@@ -75,7 +75,7 @@ type PixelType =
     | UnsignedByte = 0x1401
     
 type MatrixMode =
-    | Modelview = 0x1700
+    | ModelView = 0x1700
     | Projection = 0x1701
     | Texture = 0x1702
     
@@ -85,7 +85,7 @@ type BeginMode =
     
 // TODO
 type EnableCap =
-    | Texutre2D = 0x0DE1
+    | Texture2D = 0x0DE1
     
 type ClearMask =
     | ColorBufferBit = 0x00004000

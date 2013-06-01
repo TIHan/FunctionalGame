@@ -26,6 +26,12 @@ module internal NativeGL =
     extern void glMatrixMode (uint32 mode)
     
     [<DllImport ("opengl32.dll")>]
+    extern void glPushMatrix ()
+    
+    [<DllImport ("opengl32.dll")>]
+    extern void glPopMatrix ()
+    
+    [<DllImport ("opengl32.dll")>]
     extern void glLoadIdentity ()
     
     [<DllImport ("opengl32.dll")>]
@@ -45,6 +51,9 @@ module internal NativeGL =
     
     [<DllImport ("opengl32.dll")>]
     extern void glVertex2f (float32 x, float32 y)
+    
+    [<DllImport ("opengl32.dll")>]
+    extern void glRotatef (float32 angle, float32 x, float32 y, float32 z)  
     
     [<DllImport ("opengl32.dll")>]
     extern void glEnable (uint32 cap)
@@ -139,6 +148,20 @@ module GL =
         CheckError ()
         
     /// <summary>
+    /// glPushMatrix
+    /// </summary>   
+    let PushMatrix () =
+        NativeGL.glPushMatrix ()
+        CheckError ()
+        
+    /// <summary>
+    /// glPopMatrix
+    /// </summary>   
+    let PopMatrix () =
+        NativeGL.glPopMatrix ()
+        CheckError ()
+        
+    /// <summary>
     /// glMatrixMode
     /// </summary> 
     let LoadIdentity () =
@@ -183,6 +206,12 @@ module GL =
     /// </summary>
     let Vertex2Float x y =
         NativeGL.glVertex2f (x, y)
+        
+    /// <summary>
+    /// glRotatef
+    /// </summary>   
+    let RotateFloat angle x y z =
+        NativeGL.glRotatef (angle, x, y, z)    
         
     /// <summary>
     /// glEnable
