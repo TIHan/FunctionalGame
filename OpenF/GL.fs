@@ -59,6 +59,9 @@ module internal NativeGL =
     extern void glEnable (uint32 cap)
     
     [<DllImport ("opengl32.dll")>]
+    extern void glDisable (uint32 cap)
+    
+    [<DllImport ("opengl32.dll")>]
     extern void glClearColor (float32 red, float32 green, float32 blue, float32 alpha)
     
     [<DllImport ("opengl32.dll")>]
@@ -218,6 +221,13 @@ module GL =
     /// </summary>
     let Enable (cap: EnableCap) =
         NativeGL.glEnable (uint32 cap)
+        CheckError ()
+        
+    /// <summary>
+    /// glDisable
+    /// </summary>
+    let Disable (cap: DisableCap) =
+        NativeGL.glDisable (uint32 cap)
         CheckError ()
         
     /// <summary>

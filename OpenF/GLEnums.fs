@@ -87,6 +87,10 @@ type BeginMode =
 type EnableCap =
     | Texture2D = 0x0DE1
     
+// TODO
+type DisableCap =
+    | DepthTest = 0x0B71
+    
 type ClearMask =
     | ColorBufferBit = 0x00004000
     | StencilBufferBit = 0x00000400

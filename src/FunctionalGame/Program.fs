@@ -47,16 +47,11 @@ let LoadBlock () =
 
             
 let RenderBlock viewportWidth viewportHeight x y rotation tid  =
-    let translateX = x / float32 viewportWidth * 2.f
-    let translateY = y / float32 viewportHeight * -2.f
     
-    GL.MatrixMode MatrixMode.Projection
     GL.LoadIdentity ()
-    
     GL.BindTexture BindTextureTarget.Texture2D tid
-    //GL.TranslateFloat 0.f 0.f 0.f
-    GL.RotateFloat 45.f 0.f 0.f 1.f
-    GL.TranslateFloat (translateX / 2.f) (translateY / 2.f) 0.f
+    GL.TranslateFloat (x / 2.f)  (y / 2.f) 0.f
+    GL.RotateFloat rotation 0.f 0.f 1.f
     
     GL.Begin BeginMode.Quads
     
@@ -78,8 +73,8 @@ let RenderBlock viewportWidth viewportHeight x y rotation tid  =
 let CreateDynamicFixture world x y =
     let position = Nullable<Microsoft.Xna.Framework.Vector2> (new Microsoft.Xna.Framework.Vector2(x, y))
     let body = new Body (world, position)
-    let width = ConvertUnits.ToSimUnits(8)
-    let height = ConvertUnits.ToSimUnits(8)
+    let width = ConvertUnits.ToSimUnits(16)
+    let height = ConvertUnits.ToSimUnits(16)
     let shape = new Shapes.PolygonShape (PolygonTools.CreateRectangle(width, height), 1.0f)
     let fixture = body.CreateFixture shape
     
@@ -119,8 +114,12 @@ let main args =
     GL.Enable EnableCap.Texture2D
     GL.ClearColor 0.f 1.f 0.f 1.f
     
-    GL.Orthographic 0. (double 1280) (double 720) 0. -1. 1.
-    GL.Viewport 0 0 1280 720
+    GL.MatrixMode MatrixMode.Projection
+    GL.LoadIdentity ()
+    GL.Orthographic 0. (double 1280) (double 720) 0. 0. 1.
+    GL.MatrixMode MatrixMode.ModelView
+    
+    GL.Disable DisableCap.DepthTest
     
     let entities: Entity list = list.Empty
     
@@ -144,7 +143,7 @@ let main args =
 
         world.Step (1.f / 60.f)
         
-        GL.Clear (ClearMask.ColorBufferBit ||| ClearMask.DepthBufferBit)
+        GL.Clear (ClearMask.ColorBufferBit)
         
         List.iter (fun entity ->     
             let x = ConvertUnits.ToDisplayUnits (entity.Fixture.Body.Position.X)
@@ -164,7 +163,7 @@ let main args =
             
         match state.EntitySpawnTime < time.ElapsedMilliseconds with
         | true ->
-            ({ Entities = SpawnEntity state.Entities; EntitySpawnTime = time.ElapsedMilliseconds + int64 1000}, true)
+            ({ Entities = SpawnEntity state.Entities; EntitySpawnTime = time.ElapsedMilliseconds + int64 1000 }, true)
         | _ ->    
         (state, true)
     )
