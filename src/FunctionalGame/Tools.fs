@@ -1,4 +1,6 @@
-namespace FunctionalGame
+module FunctionalGame.Tools
+
+open System.Diagnostics
 
 type Process<'State, 'Msg> (initial: 'State, execute) =
     let mailbox = new MailboxProcessor<'Msg> (fun agent ->
@@ -20,3 +22,12 @@ type Process<'State, 'Msg> (initial: 'State, execute) =
         
     member this.TrySendAndAwait<'Reply> msg timeout : Option<'Reply> =
         mailbox.TryPostAndReply (msg, timeout)
+
+
+let TimeLoop<'State> state (execution: 'State * Stopwatch -> 'State * bool) =
+    let time = Stopwatch.StartNew ()
+    let rec TimeLoopRec state =
+        match execution (state, time) with
+        | (newState, true) -> TimeLoopRec newState
+        | _ -> ()
+    TimeLoopRec state
