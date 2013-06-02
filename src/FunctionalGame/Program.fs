@@ -50,8 +50,10 @@ let RenderBlock viewportWidth viewportHeight x y rotation tid  =
     
     GL.LoadIdentity ()
     GL.BindTexture BindTextureTarget.Texture2D tid
-    GL.TranslateFloat (x / 2.f)  (y / 2.f) 0.f
-    GL.RotateFloat rotation 0.f 0.f 1.f
+    GL.TranslateFloat (x / 2.f) (y / 2.f) 0.f
+    GL.TranslateFloat 8.0f 8.0f 0.f
+    GL.RotateFloat (rotation * 180.f / float32 Math.PI) 0.f 0.f 1.f
+    GL.TranslateFloat -8.0f -8.0f 0.f
     
     GL.Begin BeginMode.Quads
     
@@ -141,7 +143,7 @@ let main args =
         
         let startTime = time.ElapsedMilliseconds
 
-        world.Step (1.f / 60.f)
+        //world.Step (1.f / 60.f)
         
         GL.Clear (ClearMask.ColorBufferBit)
         
