@@ -143,7 +143,7 @@ let main args =
         
         let startTime = time.ElapsedMilliseconds
 
-        //world.Step (1.f / 60.f)
+        world.Step (1.f / 60.f)
         
         GL.Clear (ClearMask.ColorBufferBit)
         
