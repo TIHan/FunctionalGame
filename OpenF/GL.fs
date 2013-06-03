@@ -118,8 +118,8 @@ module GL =
     /// <summary>
     /// glBindTexture
     /// </summary>
-    let BindTexture (target: BindTextureTarget) tid =
-        NativeGL.glBindTexture (uint32 target, tid)
+    let BindTexture (target: BindTextureTarget) textureId =
+        NativeGL.glBindTexture (uint32 target, textureId)
         CheckError ()
         
     /// <summary>

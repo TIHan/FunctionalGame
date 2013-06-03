@@ -45,18 +45,18 @@ module GLFW =
         | x when x = IntPtr.Zero ->
             Terminate ()
             raise (Exception "Unable to create GLFW window.")
-        | x -> uint32 x
+        | x -> int x
         
-    let MakeContextCurrent (wid: uint32) =
-        NativeGLFW.glfwMakeContextCurrent (nativeint wid)
+    let MakeContextCurrent (windowHandle: int) =
+        NativeGLFW.glfwMakeContextCurrent (nativeint windowHandle)
         
-    let WindowShouldClose (wid: uint32) =
-        match NativeGLFW.glfwWindowShouldClose (nativeint wid) with
+    let WindowShouldClose (windowHandle: int) =
+        match NativeGLFW.glfwWindowShouldClose (nativeint windowHandle) with
         | 0 -> false
         | _ -> true
         
-    let SwapBuffers (wid: uint32) =
-        NativeGLFW.glfwSwapBuffers (nativeint wid)
+    let SwapBuffers (windowHandle: int) =
+        NativeGLFW.glfwSwapBuffers (nativeint windowHandle)
         
     let PollEvents () =
         NativeGLFW.glfwPollEvents ()

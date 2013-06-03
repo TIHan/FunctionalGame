@@ -14,7 +14,10 @@
         <String>Tools.fs</String>
         <String>Window.fs</String>
         <String>Renderer.fs</String>
+        <String>SharedGame.fs</String>
         <String>ClientGame.fs</String>
+        <String>Physics.fs</String>
+        <String>Game.fs</String>
         <String>Program.fs</String>
       </BuildOrder>
     </BuildOrder>
@@ -54,6 +57,9 @@
     <Compile Include="ClientGame.fs" />
     <Compile Include="Renderer.fs" />
     <Compile Include="Window.fs" />
+    <Compile Include="SharedGame.fs" />
+    <Compile Include="Game.fs" />
+    <Compile Include="Physics.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" />
   <ItemGroup>
