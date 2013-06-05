@@ -14,13 +14,13 @@ type Process<'State, 'Msg> (initial: 'State, execute) =
     member this.Start () =
         mailbox.Start ()
 
-    member this.Send msg =
+    member this.Async msg =
         mailbox.Post msg
     
-    member this.SendAndAwait<'Reply> msg : 'Reply =
+    member this.Sync<'Reply> msg : 'Reply =
         mailbox.PostAndReply msg
         
-    member this.TrySendAndAwait<'Reply> msg timeout : Option<'Reply> =
+    member this.TrySync<'Reply> msg timeout : Option<'Reply> =
         mailbox.TryPostAndReply (msg, timeout)
 
 
