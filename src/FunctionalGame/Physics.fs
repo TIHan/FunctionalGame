@@ -16,7 +16,7 @@ let private CreateDynamicFixture world displayWidth displayHeight x y =
     let shape = new Shapes.PolygonShape (PolygonTools.CreateRectangle(width, height), 1.0f)
     let fixture = body.CreateFixture shape
     
-    fixture.Restitution <- 0.0f
+    fixture.Restitution <- 0.5f
     fixture.Body.BodyType <- BodyType.Dynamic
     fixture.Body.Mass <- 1.0f
     fixture.Body.SleepingAllowed <- true
@@ -37,6 +37,8 @@ type PhysicsEngine (gravityX, gravityY) =
     let mutable counter = 0
     let world = new World (new Microsoft.Xna.Framework.Vector2 (gravityX, gravityY))
 
+    do
+        CreateFloor world 0.0f (ConvertUnits.ToSimUnits (720.f))
 
     member this.CreateObject width height x y =
         let fixture = CreateDynamicFixture world width height x y
