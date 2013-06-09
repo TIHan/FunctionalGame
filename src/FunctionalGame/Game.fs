@@ -43,7 +43,7 @@ let Init () =
 /// Tick
 /// </summary>       
 let Tick (state: State) =
-    state.PhysicsEngine.Tick (1.f / 60.f)
+    state.PhysicsEngine.Tick (1.f / 20.f)
     let entities = state.Entities |> Map.map (fun id entity ->
         let updated = { entity with Physics = state.PhysicsEngine.GetUpdatedObject entity.Physics }
         state.EventQueue.Enqueue (EntityUpdated (updated.Id, updated.Physics.X, updated.Physics.Y, updated.Physics.Rotation))
