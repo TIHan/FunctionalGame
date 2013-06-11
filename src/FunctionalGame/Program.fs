@@ -5,43 +5,54 @@ open System.Threading
 open System.Diagnostics
 open FunctionalGame.SharedGame
     
-type GameState = { State: Game.State; ClientState: ClientGame.State; Time: int64 }
+type Game = {
+    State: Game.State;
+    ClientState: ClientGame.State;
+    TotalTime: int64;
+    ElapsedTime: int64;
+    Frames: int;
+}
 
-let CalculateLerpAmount rate time currentTime =
+let inline CalculateLerpAmount currentTime time rate =
     (currentTime - time) / rate
 
 [<EntryPoint>]
 let main args = 
-    
-    let gameState = { State = Game.Init (); ClientState = ClientGame.Init (); Time = int64 0 }
     let rate = (1.f / 20.f * 1000.f)
+    let clientRate = (1.f / 60.f * 1000.f)
     
-    Tools.TimeLoop gameState (fun (state, time) ->
-        match not (ClientGame.ShouldClose state.ClientState)  with
-        | false -> (state, false)
-        | _ ->
-        let currentTime = time.ElapsedMilliseconds
-        let timeToUpdate = float32 state.Time + rate
+    Tools.TimeLoop {
+            State = Game.Init ();
+            ClientState = ClientGame.Init ();
+            TotalTime = int64 0;
+            ElapsedTime = int64 0;
+            Frames = 0;
+        }
         
-        match float32 time.ElapsedMilliseconds >= timeToUpdate with
-        | false ->
-            let updatedClientState = state.ClientState |> ClientGame.ProcessEvents state.State.EventQueue
-            let lerpAmount = CalculateLerpAmount rate (float32 state.Time) (float32 time.ElapsedMilliseconds)
-
-            ({ state with ClientState = updatedClientState |> ClientGame.Tick lerpAmount }, true)
-        | _ ->
-        
-        let changedState = 
-            match state.State.EntitySpawnTime < time.ElapsedMilliseconds with
-            | false -> state.State
+        (fun (game, time) ->
+            match not (ClientGame.ShouldClose game.ClientState)  with
+            | false -> (game, false)
             | _ ->
-                let newState = Game.SpawnEntity state.State EntityType.Block 16.f 16.f 5.f 0.f
-                { newState with EntitySpawnTime = time.ElapsedMilliseconds + int64 600 }
-            |> Game.Tick
-        
-        let elapsedTime = time.ElapsedMilliseconds - currentTime
-        
-        ({ state with State = changedState; Time = currentTime }, true)
+            let beginTime = time.ElapsedMilliseconds
+            let timeToUpdate = float32 game.TotalTime + rate
+            
+            match float32 time.ElapsedMilliseconds >= timeToUpdate with
+            | false ->                    
+                let lerpAmount = float32 (time.ElapsedMilliseconds - game.TotalTime) / ((float32 game.TotalTime + rate) - float32 (game.TotalTime + game.ElapsedTime))
+                let updatedClientState = game.ClientState |> ClientGame.ProcessEvents game.State.EventQueue |> ClientGame.Tick lerpAmount
+                ({ game with ClientState = updatedClientState; Frames = game.Frames + 1 }, true)
+            | _ ->
+            
+            let updatedState = 
+                match game.State.EntitySpawnTime < time.ElapsedMilliseconds with
+                | false -> game.State
+                | _ ->
+                    let newState = Game.SpawnEntity game.State EntityType.Block 16.f 16.f 5.f 0.f
+                    { newState with EntitySpawnTime = time.ElapsedMilliseconds + int64 600 }
+                |> Game.Tick
+            
+            printfn "%i" game.Frames
+            ({ game with State = updatedState; TotalTime = beginTime; ElapsedTime = time.ElapsedMilliseconds - beginTime; Frames = 0 }, true)
     )
     0
 
