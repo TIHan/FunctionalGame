@@ -110,14 +110,11 @@ let private ProcessEvent state evt =
 /// <summary>
 /// ProcessEvents
 /// </summary> 
-let rec ProcessEvents (evtQueue: ConcurrentQueue<Event>) state =
-    match evtQueue.IsEmpty with
-    | true -> state
-    | _ ->
-    
-    let mutable evt: Event = None
-    evtQueue.TryDequeue (&evt) |> ignore
-    ProcessEvents evtQueue (ProcessEvent state evt)
+let rec ProcessEvents (eventQueue: Event list) state =
+    match eventQueue with
+    | [] -> state
+    | head :: tail ->
+        ProcessEvents tail (ProcessEvent state head)
     
 /// <summary>
 /// Init

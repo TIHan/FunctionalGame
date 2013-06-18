@@ -4,9 +4,6 @@ open System
 open System.IO
 open System.Drawing
 open System.Diagnostics
-open System.Threading
-open System.Collections.Generic
-open System.Collections.Concurrent
 open FunctionalGame.SharedGame
 
 /// <summary>
@@ -22,33 +19,59 @@ type State = {
     Counter: int;
     EntitySpawnTime: int64;
     PhysicsEngine: Physics.PhysicsEngine;
-    EventQueue: ConcurrentQueue<Event>
+    EventQueue: Event list
 }
 
 /// <summary>
 /// SpawnEntity
 /// </summary>
-let SpawnEntity (state: State) entityType width height x y =
+let private SpawnEntity (state: State) entityType width height x y =
     let entity = { Id = state.Counter; Type = entityType; Physics = state.PhysicsEngine.CreateObject width height x y }
-    state.EventQueue.Enqueue (EntitySpawned (entity.Id, entity.Type, width, height, x, y, 0.f))
-    { state with Counter = state.Counter + 1; Entities = Map.add entity.Id entity state.Entities }
+    let evt = EntitySpawned (entity.Id, entity.Type, width, height, x, y, 0.f)
+    { state with Counter = state.Counter + 1; Entities = Map.add entity.Id entity state.Entities; EventQueue = state.EventQueue @ [evt] }
+    
+    
+let private UpdateEntity (state: State) entity =
+    { entity with Physics = state.PhysicsEngine.GetUpdatedObject entity.Physics }
+
+/// <summary>
+/// GameLogic
+/// </summary>    
+let private GameLogic tickTime (state: State) =
+    match state.EntitySpawnTime < tickTime with
+    | false -> state
+    | _ ->
+        let newState = SpawnEntity state EntityType.Block 16.f 16.f 5.f 0.f
+        { newState with EntitySpawnTime = tickTime + int64 600 }
+        
+/// <summary>
+/// TickPhysics
+/// </summary>         
+let private TickPhysics (state: State) =
+    state.PhysicsEngine.Tick (1.f / 20.f)
+    
+    let entities = state.Entities |> Map.map (fun id entity ->
+        UpdateEntity state entity
+    )
+    
+    let events = state.Entities |> Map.map (fun id entity ->
+                        EntityUpdated (entity.Id, entity.Physics.X, entity.Physics.Y, entity.Physics.Rotation)
+                    )
+                |> Map.toList |> List.map (fun (id, entity) -> entity)
+    
+    { state with Entities = entities; EventQueue = state.EventQueue @ events }
+    
     
 /// <summary>
 /// Init
 /// </summary>       
 let Init () =
-    { Entities = Map.empty; Counter = 0; EntitySpawnTime = int64 0; PhysicsEngine = new Physics.PhysicsEngine (0.f, 9.82f); EventQueue = new ConcurrentQueue<Event> () }
+    { Entities = Map.empty; Counter = 0; EntitySpawnTime = int64 0; PhysicsEngine = new Physics.PhysicsEngine (0.f, 9.82f); EventQueue = [] }
+
     
 /// <summary>
 /// Tick
 /// </summary>       
-let Tick (state: State) =
-    state.PhysicsEngine.Tick (1.f / 20.f)
-    let entities = state.Entities |> Map.map (fun id entity ->
-        let updated = { entity with Physics = state.PhysicsEngine.GetUpdatedObject entity.Physics }
-        state.EventQueue.Enqueue (EntityUpdated (updated.Id, updated.Physics.X, updated.Physics.Y, updated.Physics.Rotation))
-        updated
-    )
-    { state with Entities = entities }
-
+let Tick tickTime (state: State) =
+    { state with EventQueue = [] } |> GameLogic tickTime |> TickPhysics
 

@@ -11,12 +11,12 @@ open FarseerPhysics.Dynamics
 let private CreateDynamicFixture world displayWidth displayHeight x y =
     let position = Nullable<Microsoft.Xna.Framework.Vector2> (new Microsoft.Xna.Framework.Vector2(x, y))
     let body = new Body (world, position)
-    let width = ConvertUnits.ToSimUnits(displayWidth / 2.f)
-    let height = ConvertUnits.ToSimUnits(displayHeight / 2.f)
+    let width = ConvertUnits.ToSimUnits(displayWidth / 2.f - 1.f)
+    let height = ConvertUnits.ToSimUnits(displayHeight / 2.f - 1.f)
     let shape = new Shapes.PolygonShape (PolygonTools.CreateRectangle(width, height), 1.0f)
     let fixture = body.CreateFixture shape
     
-    fixture.Restitution <- 0.5f
+    fixture.Restitution <- 0.4f
     fixture.Body.BodyType <- BodyType.Dynamic
     fixture.Body.Mass <- 1.0f
     fixture.Body.SleepingAllowed <- true
@@ -32,7 +32,7 @@ let private CreateFloor world x y =
 
 type PhysicsObject = { Id: int; X: float32; Y: float32; Rotation: float32 }
 
-type PhysicsEngine (gravityX, gravityY) =
+type PhysicsEngine (gravityX, gravityY) as this =
     let mutable fixtureLookup = new Dictionary<int, Fixture> ()
     let mutable counter = 0
     let world = new World (new Microsoft.Xna.Framework.Vector2 (gravityX, gravityY))
