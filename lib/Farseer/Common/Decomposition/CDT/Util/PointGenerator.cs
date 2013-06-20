@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace FarseerPhysics.Common.Decomposition.CDT.Util
+namespace Poly2Tri.Triangulation.Util
 {
-    internal class PointGenerator
+    public class PointGenerator
     {
         private static readonly Random RNG = new Random();
 

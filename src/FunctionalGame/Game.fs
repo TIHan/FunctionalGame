@@ -42,7 +42,7 @@ let private GameLogic tickTime (state: State) =
     | false -> state
     | _ ->
         let newState = SpawnEntity state EntityType.Block 16.f 16.f 5.f 0.f
-        { newState with EntitySpawnTime = tickTime + int64 600 }
+        { newState with EntitySpawnTime = tickTime + int64 1000 }
         
 /// <summary>
 /// TickPhysics

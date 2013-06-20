@@ -31,7 +31,7 @@
 
 namespace FarseerPhysics.Common.Decomposition.CDT
 {
-    internal enum Orientation
+    public enum Orientation
     {
         CW,
         CCW,

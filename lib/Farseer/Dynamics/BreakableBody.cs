@@ -29,6 +29,11 @@ namespace FarseerPhysics.Dynamics
         private World _world;
 
         public BreakableBody(IEnumerable<Vertices> vertices, World world, float density)
+            : this(vertices, world, density, null)
+        {
+        }
+
+        public BreakableBody(IEnumerable<Vertices> vertices, World world, float density, object userData)
         {
             _world = world;
             _world.ContactManager.PostSolve += PostSolve;
@@ -38,26 +43,12 @@ namespace FarseerPhysics.Dynamics
             foreach (Vertices part in vertices)
             {
                 PolygonShape polygonShape = new PolygonShape(part, density);
-                Fixture fixture = MainBody.CreateFixture(polygonShape);
+                Fixture fixture = MainBody.CreateFixture(polygonShape, userData);
                 Parts.Add(fixture);
             }
         }
 
-        public BreakableBody(IEnumerable<Shape> shapes, World world)
-        {
-            _world = world;
-            _world.ContactManager.PostSolve += PostSolve;
-            MainBody = new Body(_world);
-            MainBody.BodyType = BodyType.Dynamic;
-
-            foreach (Shape part in shapes)
-            {
-                Fixture fixture = MainBody.CreateFixture(part);
-                Parts.Add(fixture);
-            }
-        }
-
-        private void PostSolve(Contact contact, ContactVelocityConstraint impulse)
+        private void PostSolve(Contact contact, ContactConstraint impulse)
         {
             if (!Broken)
             {
@@ -68,7 +59,7 @@ namespace FarseerPhysics.Dynamics
 
                     for (int i = 0; i < count; ++i)
                     {
-                        maxImpulse = Math.Max(maxImpulse, impulse.points[i].normalImpulse);
+                        maxImpulse = Math.Max(maxImpulse, impulse.Points[i].NormalImpulse);
                     }
 
                     if (maxImpulse > Strength)
@@ -115,12 +106,12 @@ namespace FarseerPhysics.Dynamics
 
             for (int i = 0; i < Parts.Count; i++)
             {
-                Fixture oldFixture = Parts[i];
+                Fixture fixture = Parts[i];
 
-                Shape shape = oldFixture.Shape.Clone();
-                object userData = oldFixture.UserData;
+                Shape shape = fixture.Shape.Clone();
 
-                MainBody.DestroyFixture(oldFixture);
+                object userdata = fixture.UserData;
+                MainBody.DestroyFixture(fixture);
 
                 Body body = BodyFactory.CreateBody(_world);
                 body.BodyType = BodyType.Dynamic;
@@ -128,9 +119,7 @@ namespace FarseerPhysics.Dynamics
                 body.Rotation = MainBody.Rotation;
                 body.UserData = MainBody.UserData;
 
-                Fixture newFixture = body.CreateFixture(shape);
-                newFixture.UserData = userData;
-                Parts[i] = newFixture;
+                body.CreateFixture(shape, userdata);
 
                 body.AngularVelocity = _angularVelocitiesCache[i];
                 body.LinearVelocity = _velocitiesCache[i];

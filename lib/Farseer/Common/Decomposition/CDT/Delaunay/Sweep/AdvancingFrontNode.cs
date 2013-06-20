@@ -35,9 +35,9 @@
 // Future possibilities
 //   Comments!
 
-namespace FarseerPhysics.Common.Decomposition.CDT.Delaunay.Sweep
+namespace Poly2Tri.Triangulation.Delaunay.Sweep
 {
-    internal class AdvancingFrontNode
+    public class AdvancingFrontNode
     {
         public AdvancingFrontNode Next;
         public TriangulationPoint Point;

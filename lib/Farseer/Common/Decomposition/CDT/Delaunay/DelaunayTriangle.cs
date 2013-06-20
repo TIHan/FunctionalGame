@@ -41,12 +41,12 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using FarseerPhysics.Common.Decomposition.CDT.Delaunay.Sweep;
-using FarseerPhysics.Common.Decomposition.CDT.Util;
+using Poly2Tri.Triangulation.Delaunay.Sweep;
+using Poly2Tri.Triangulation.Util;
 
-namespace FarseerPhysics.Common.Decomposition.CDT.Delaunay
+namespace Poly2Tri.Triangulation.Delaunay
 {
-    internal class DelaunayTriangle
+    public class DelaunayTriangle
     {
         /** Neighbor pointers */
 
@@ -55,11 +55,11 @@ namespace FarseerPhysics.Common.Decomposition.CDT.Delaunay
 
         /** Flags to determine if an edge is a Constrained edge */
         public FixedBitArray3 EdgeIsDelaunay;
-        public Util.FixedArray3<DelaunayTriangle> Neighbors;
+        public FixedArray3<DelaunayTriangle> Neighbors;
 
         /** Has this triangle been marked as an interior triangle? */
 
-        public Util.FixedArray3<TriangulationPoint> Points;
+        public FixedArray3<TriangulationPoint> Points;
 
         public DelaunayTriangle(TriangulationPoint p1, TriangulationPoint p2, TriangulationPoint p3)
         {

@@ -10,55 +10,81 @@ namespace FarseerPhysics.Factories
 {
     public static class BodyFactory
     {
-        public static Body CreateBody(World world, object userData = null)
+        public static Body CreateBody(World world)
         {
-            Body body = new Body(world, null, 0, userData);
+            return CreateBody(world, null);
+        }
+
+        public static Body CreateBody(World world, object userData)
+        {
+            Body body = new Body(world, userData);
             return body;
         }
 
-        public static Body CreateBody(World world, Vector2 position, float rotation = 0, object userData = null)
+        public static Body CreateBody(World world, Vector2 position)
         {
-            Body body = new Body(world, position, rotation, userData);
+            return CreateBody(world, position, null);
+        }
+
+        public static Body CreateBody(World world, Vector2 position, object userData)
+        {
+            Body body = CreateBody(world, userData);
+            body.Position = position;
             return body;
         }
 
-        public static Body CreateEdge(World world, Vector2 start, Vector2 end, object userData = null)
+        public static Body CreateEdge(World world, Vector2 start, Vector2 end)
+        {
+            return CreateEdge(world, start, end, null);
+        }
+
+        public static Body CreateEdge(World world, Vector2 start, Vector2 end, object userData)
         {
             Body body = CreateBody(world);
             FixtureFactory.AttachEdge(start, end, body, userData);
             return body;
         }
 
-        public static Body CreateChainShape(World world, Vertices vertices, object userData = null)
+        public static Body CreateLoopShape(World world, Vertices vertices)
         {
-            return CreateChainShape(world, vertices, Vector2.Zero, userData);
+            return CreateLoopShape(world, vertices, null);
         }
 
-        public static Body CreateChainShape(World world, Vertices vertices, Vector2 position, object userData = null)
-        {
-            Body body = CreateBody(world, position);
-            FixtureFactory.AttachChainShape(vertices, body, userData);
-            return body;
-        }
-
-        public static Body CreateLoopShape(World world, Vertices vertices, object userData = null)
+        public static Body CreateLoopShape(World world, Vertices vertices, object userData)
         {
             return CreateLoopShape(world, vertices, Vector2.Zero, userData);
         }
 
-        public static Body CreateLoopShape(World world, Vertices vertices, Vector2 position, object userData = null)
+        public static Body CreateLoopShape(World world, Vertices vertices, Vector2 position)
+        {
+            return CreateLoopShape(world, vertices, position, null);
+        }
+
+        public static Body CreateLoopShape(World world, Vertices vertices, Vector2 position,
+                                           object userData)
         {
             Body body = CreateBody(world, position);
             FixtureFactory.AttachLoopShape(vertices, body, userData);
             return body;
         }
 
-        public static Body CreateRectangle(World world, float width, float height, float density, object userData = null)
+        public static Body CreateRectangle(World world, float width, float height, float density)
+        {
+            return CreateRectangle(world, width, height, density, null);
+        }
+
+        public static Body CreateRectangle(World world, float width, float height, float density, object userData)
         {
             return CreateRectangle(world, width, height, density, Vector2.Zero, userData);
         }
 
-        public static Body CreateRectangle(World world, float width, float height, float density, Vector2 position, object userData = null)
+        public static Body CreateRectangle(World world, float width, float height, float density, Vector2 position)
+        {
+            return CreateRectangle(world, width, height, density, position, null);
+        }
+
+        public static Body CreateRectangle(World world, float width, float height, float density, Vector2 position,
+                                           object userData)
         {
             if (width <= 0)
                 throw new ArgumentOutOfRangeException("width", "Width must be more than 0 meters");
@@ -67,58 +93,102 @@ namespace FarseerPhysics.Factories
                 throw new ArgumentOutOfRangeException("height", "Height must be more than 0 meters");
 
             Body newBody = CreateBody(world, position);
-            newBody.UserData = userData;
-
             Vertices rectangleVertices = PolygonTools.CreateRectangle(width / 2, height / 2);
             PolygonShape rectangleShape = new PolygonShape(rectangleVertices, density);
-            newBody.CreateFixture(rectangleShape);
+            newBody.CreateFixture(rectangleShape, userData);
 
             return newBody;
         }
 
-        public static Body CreateCircle(World world, float radius, float density, object userData = null)
+        public static Body CreateCircle(World world, float radius, float density)
+        {
+            return CreateCircle(world, radius, density, null);
+        }
+
+        public static Body CreateCircle(World world, float radius, float density, object userData)
         {
             return CreateCircle(world, radius, density, Vector2.Zero, userData);
         }
 
-        public static Body CreateCircle(World world, float radius, float density, Vector2 position, object userData = null)
+        public static Body CreateCircle(World world, float radius, float density, Vector2 position)
+        {
+            return CreateCircle(world, radius, density, position, null);
+        }
+
+        public static Body CreateCircle(World world, float radius, float density, Vector2 position, object userData)
         {
             Body body = CreateBody(world, position);
             FixtureFactory.AttachCircle(radius, density, body, userData);
             return body;
         }
 
-        public static Body CreateEllipse(World world, float xRadius, float yRadius, int edges, float density, object userData = null)
+        public static Body CreateEllipse(World world, float xRadius, float yRadius, int edges, float density)
+        {
+            return CreateEllipse(world, xRadius, yRadius, edges, density, null);
+        }
+
+        public static Body CreateEllipse(World world, float xRadius, float yRadius, int edges, float density,
+                                         object userData)
         {
             return CreateEllipse(world, xRadius, yRadius, edges, density, Vector2.Zero, userData);
         }
 
         public static Body CreateEllipse(World world, float xRadius, float yRadius, int edges, float density,
-                                         Vector2 position, object userData = null)
+                                         Vector2 position)
+        {
+            return CreateEllipse(world, xRadius, yRadius, edges, density, position, null);
+        }
+
+        public static Body CreateEllipse(World world, float xRadius, float yRadius, int edges, float density,
+                                         Vector2 position, object userData)
         {
             Body body = CreateBody(world, position);
             FixtureFactory.AttachEllipse(xRadius, yRadius, edges, density, body, userData);
             return body;
         }
 
-        public static Body CreatePolygon(World world, Vertices vertices, float density, object userData = null)
+        public static Body CreatePolygon(World world, Vertices vertices, float density)
+        {
+            return CreatePolygon(world, vertices, density, null);
+        }
+
+        public static Body CreatePolygon(World world, Vertices vertices, float density, object userData)
         {
             return CreatePolygon(world, vertices, density, Vector2.Zero, userData);
         }
 
-        public static Body CreatePolygon(World world, Vertices vertices, float density, Vector2 position, object userData = null)
+        public static Body CreatePolygon(World world, Vertices vertices, float density, Vector2 position)
+        {
+            return CreatePolygon(world, vertices, density, position, null);
+        }
+
+        public static Body CreatePolygon(World world, Vertices vertices, float density, Vector2 position,
+                                         object userData)
         {
             Body body = CreateBody(world, position);
             FixtureFactory.AttachPolygon(vertices, density, body, userData);
             return body;
         }
 
-        public static Body CreateCompoundPolygon(World world, List<Vertices> list, float density, object userData = null)
+        public static Body CreateCompoundPolygon(World world, List<Vertices> list, float density)
+        {
+            return CreateCompoundPolygon(world, list, density, BodyType.Static);
+        }
+
+        public static Body CreateCompoundPolygon(World world, List<Vertices> list, float density,
+                                                 object userData)
         {
             return CreateCompoundPolygon(world, list, density, Vector2.Zero, userData);
         }
 
-        public static Body CreateCompoundPolygon(World world, List<Vertices> list, float density, Vector2 position, object userData = null)
+        public static Body CreateCompoundPolygon(World world, List<Vertices> list, float density,
+                                                 Vector2 position)
+        {
+            return CreateCompoundPolygon(world, list, density, position, null);
+        }
+
+        public static Body CreateCompoundPolygon(World world, List<Vertices> list, float density,
+                                                 Vector2 position, object userData)
         {
             //We create a single body
             Body polygonBody = CreateBody(world, position);
@@ -126,7 +196,15 @@ namespace FarseerPhysics.Factories
             return polygonBody;
         }
 
-        public static Body CreateGear(World world, float radius, int numberOfTeeth, float tipPercentage, float toothHeight, float density, object userData = null)
+
+        public static Body CreateGear(World world, float radius, int numberOfTeeth, float tipPercentage,
+                                      float toothHeight, float density)
+        {
+            return CreateGear(world, radius, numberOfTeeth, tipPercentage, toothHeight, density, null);
+        }
+
+        public static Body CreateGear(World world, float radius, int numberOfTeeth, float tipPercentage,
+                                      float toothHeight, float density, object userData)
         {
             Vertices gearPolygon = PolygonTools.CreateGear(radius, numberOfTeeth, tipPercentage, toothHeight);
 
@@ -134,7 +212,7 @@ namespace FarseerPhysics.Factories
             if (!gearPolygon.IsConvex())
             {
                 //Decompose the gear:
-                List<Vertices> list = Triangulate.ConvexPartition(gearPolygon, TriangulationAlgorithm.Earclip);
+                List<Vertices> list = EarclipDecomposer.ConvexPartition(gearPolygon);
 
                 return CreateCompoundPolygon(world, list, density, userData);
             }
@@ -146,8 +224,18 @@ namespace FarseerPhysics.Factories
         /// Creates a capsule.
         /// Note: Automatically decomposes the capsule if it contains too many vertices (controlled by Settings.MaxPolygonVertices)
         /// </summary>
+        /// <param name="world">The world.</param>
+        /// <param name="height">The height.</param>
+        /// <param name="topRadius">The top radius.</param>
+        /// <param name="topEdges">The top edges.</param>
+        /// <param name="bottomRadius">The bottom radius.</param>
+        /// <param name="bottomEdges">The bottom edges.</param>
+        /// <param name="density">The density.</param>
+        /// <param name="position">The position.</param>
         /// <returns></returns>
-        public static Body CreateCapsule(World world, float height, float topRadius, int topEdges, float bottomRadius, int bottomEdges, float density, Vector2 position, object userData = null)
+        public static Body CreateCapsule(World world, float height, float topRadius, int topEdges,
+                                         float bottomRadius,
+                                         int bottomEdges, float density, Vector2 position, object userData)
         {
             Vertices verts = PolygonTools.CreateCapsule(height, topRadius, topEdges, bottomRadius, bottomEdges);
 
@@ -156,7 +244,7 @@ namespace FarseerPhysics.Factories
             //There are too many vertices in the capsule. We decompose it.
             if (verts.Count >= Settings.MaxPolygonVertices)
             {
-                List<Vertices> vertList = Triangulate.ConvexPartition(verts, TriangulationAlgorithm.Earclip);
+                List<Vertices> vertList = EarclipDecomposer.ConvexPartition(verts);
                 body = CreateCompoundPolygon(world, vertList, density, userData);
                 body.Position = position;
 
@@ -169,8 +257,20 @@ namespace FarseerPhysics.Factories
             return body;
         }
 
+        public static Body CreateCapsule(World world, float height, float topRadius, int topEdges,
+                                         float bottomRadius,
+                                         int bottomEdges, float density, Vector2 position)
+        {
+            return CreateCapsule(world, height, topRadius, topEdges, bottomRadius, bottomEdges, density, position, null);
+        }
+
+        public static Body CreateCapsule(World world, float height, float endRadius, float density)
+        {
+            return CreateCapsule(world, height, endRadius, density, null);
+        }
+
         public static Body CreateCapsule(World world, float height, float endRadius, float density,
-                                         object userData = null)
+                                         object userData)
         {
             //Create the middle rectangle
             Vertices rectangle = PolygonTools.CreateRectangle(endRadius, height / 2);
@@ -179,16 +279,15 @@ namespace FarseerPhysics.Factories
             list.Add(rectangle);
 
             Body body = CreateCompoundPolygon(world, list, density, userData);
-            body.UserData = userData;
 
             //Create the two circles
             CircleShape topCircle = new CircleShape(endRadius, density);
             topCircle.Position = new Vector2(0, height / 2);
-            body.CreateFixture(topCircle);
+            body.CreateFixture(topCircle, userData);
 
             CircleShape bottomCircle = new CircleShape(endRadius, density);
             bottomCircle.Position = new Vector2(0, -(height / 2));
-            body.CreateFixture(bottomCircle);
+            body.CreateFixture(bottomCircle, userData);
             return body;
         }
 
@@ -205,14 +304,17 @@ namespace FarseerPhysics.Factories
         /// <param name="density">The density.</param>
         /// <param name="position">The position.</param>
         /// <returns></returns>
-        public static Body CreateRoundedRectangle(World world, float width, float height, float xRadius, float yRadius, int segments, float density, Vector2 position, object userData = null)
+        public static Body CreateRoundedRectangle(World world, float width, float height, float xRadius,
+                                                  float yRadius,
+                                                  int segments, float density, Vector2 position,
+                                                  object userData)
         {
             Vertices verts = PolygonTools.CreateRoundedRectangle(width, height, xRadius, yRadius, segments);
 
             //There are too many vertices in the capsule. We decompose it.
             if (verts.Count >= Settings.MaxPolygonVertices)
             {
-                List<Vertices> vertList = Triangulate.ConvexPartition(verts, TriangulationAlgorithm.Earclip);
+                List<Vertices> vertList = EarclipDecomposer.ConvexPartition(verts);
                 Body body = CreateCompoundPolygon(world, vertList, density, userData);
                 body.Position = position;
                 return body;
@@ -221,19 +323,36 @@ namespace FarseerPhysics.Factories
             return CreatePolygon(world, verts, density);
         }
 
-        public static Body CreateRoundedRectangle(World world, float width, float height, float xRadius, float yRadius, int segments, float density, object userData = null)
+        public static Body CreateRoundedRectangle(World world, float width, float height, float xRadius,
+                                                  float yRadius,
+                                                  int segments, float density, Vector2 position)
         {
-            return CreateRoundedRectangle(world, width, height, xRadius, yRadius, segments, density, Vector2.Zero, userData);
+            return CreateRoundedRectangle(world, width, height, xRadius, yRadius, segments, density, position, null);
+        }
+
+        public static Body CreateRoundedRectangle(World world, float width, float height, float xRadius,
+                                                  float yRadius,
+                                                  int segments, float density)
+        {
+            return CreateRoundedRectangle(world, width, height, xRadius, yRadius, segments, density, null);
+        }
+
+        public static Body CreateRoundedRectangle(World world, float width, float height, float xRadius,
+                                                  float yRadius,
+                                                  int segments, float density, object userData)
+        {
+            return CreateRoundedRectangle(world, width, height, xRadius, yRadius, segments, density, Vector2.Zero,
+                                          userData);
         }
 
         public static BreakableBody CreateBreakableBody(World world, Vertices vertices, float density)
         {
-            return CreateBreakableBody(world, vertices, density, Vector2.Zero);
+            return CreateBreakableBody(world, vertices, density, null);
         }
 
-        public static BreakableBody CreateBreakableBody(World world, IEnumerable<Shape> shapes)
+        public static BreakableBody CreateBreakableBody(World world, Vertices vertices, float density, object userData)
         {
-            return CreateBreakableBody(world, shapes, Vector2.Zero);
+            return CreateBreakableBody(world, vertices, density, Vector2.Zero, userData);
         }
 
         /// <summary>
@@ -244,24 +363,21 @@ namespace FarseerPhysics.Factories
         /// <param name="density">The density.</param>
         /// <param name="position">The position.</param>
         /// <returns></returns>
-        public static BreakableBody CreateBreakableBody(World world, Vertices vertices, float density, Vector2 position)
+        public static BreakableBody CreateBreakableBody(World world, Vertices vertices, float density, Vector2 position,
+                                                        object userData)
         {
-            List<Vertices> triangles = Triangulate.ConvexPartition(vertices, TriangulationAlgorithm.Earclip);
+            List<Vertices> triangles = EarclipDecomposer.ConvexPartition(vertices);
 
-            BreakableBody breakableBody = new BreakableBody(triangles, world, density);
+            BreakableBody breakableBody = new BreakableBody(triangles, world, density, userData);
             breakableBody.MainBody.Position = position;
             world.AddBreakableBody(breakableBody);
 
             return breakableBody;
         }
 
-        public static BreakableBody CreateBreakableBody(World world, IEnumerable<Shape> shapes, Vector2 position)
+        public static BreakableBody CreateBreakableBody(World world, Vertices vertices, float density, Vector2 position)
         {
-            BreakableBody breakableBody = new BreakableBody(shapes, world);
-            breakableBody.MainBody.Position = position;
-            world.AddBreakableBody(breakableBody);
-
-            return breakableBody;
+            return CreateBreakableBody(world, vertices, density, position, null);
         }
 
         public static Body CreateLineArc(World world, float radians, int sides, float radius, Vector2 position,

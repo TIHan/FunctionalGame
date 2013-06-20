@@ -30,11 +30,11 @@
  */
 
 using System.Collections.Generic;
-using FarseerPhysics.Common.Decomposition.CDT.Delaunay;
+using Poly2Tri.Triangulation.Delaunay;
 
-namespace FarseerPhysics.Common.Decomposition.CDT
+namespace Poly2Tri.Triangulation
 {
-    internal interface Triangulatable
+    public interface Triangulatable
     {
         IList<TriangulationPoint> Points { get; } // MM: Neither of these are used via interface (yet?)
         IList<DelaunayTriangle> Triangles { get; }

@@ -30,11 +30,11 @@
  */
 
 using System.Collections.Generic;
-using FarseerPhysics.Common.Decomposition.CDT.Delaunay.Sweep;
+using Poly2Tri.Triangulation.Delaunay.Sweep;
 
-namespace FarseerPhysics.Common.Decomposition.CDT
+namespace Poly2Tri.Triangulation
 {
-    internal class TriangulationPoint
+    public class TriangulationPoint
     {
         // List of edges this point constitutes an upper ending point (CDT)
 

@@ -30,11 +30,11 @@
  */
 
 using System.Collections.Generic;
-using FarseerPhysics.Common.Decomposition.CDT.Delaunay;
+using Poly2Tri.Triangulation.Delaunay;
 
-namespace FarseerPhysics.Common.Decomposition.CDT.Sets
+namespace Poly2Tri.Triangulation.Sets
 {
-    internal class PointSet : Triangulatable
+    public class PointSet : Triangulatable
     {
         public PointSet(List<TriangulationPoint> points)
         {

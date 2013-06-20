@@ -2,7 +2,7 @@
 using FarseerPhysics.Collision;
 using Microsoft.Xna.Framework;
 
-namespace FarseerPhysics.Common.TextureTools
+namespace FarseerPhysics.Common
 {
     // Ported by Matthew Bettcher - Feb 2011
 

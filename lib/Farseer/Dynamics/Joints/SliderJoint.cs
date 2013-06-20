@@ -1,9 +1,12 @@
 /*
-* Farseer Physics Engine:
-* Copyright (c) 2012 Ian Qvist
+* Farseer Physics Engine based on Box2D.XNA port:
+* Copyright (c) 2010 Ian Qvist
 * 
+* Box2D.XNA port of Box2D:
+* Copyright (c) 2009 Brandon Furtwangler, Nathan Furtwangler
+*
 * Original source Box2D:
-* Copyright (c) 2006-2011 Erin Catto http://www.box2d.org 
+* Copyright (c) 2006-2009 Erin Catto http://www.gphysics.com 
 * 
 * This software is provided 'as-is', without any express or implied 
 * warranty.  In no event will the authors be held liable for any damages 
@@ -28,7 +31,7 @@ using Microsoft.Xna.Framework;
 namespace FarseerPhysics.Dynamics.Joints
 {
     /// <summary>
-    /// A slider joint contrains two points on two bodies
+    /// A distance joint contrains two points on two bodies
     /// to remain at a fixed distance from each other. You can view
     /// this as a massless, rigid rod.
     /// </summary>
@@ -73,7 +76,8 @@ namespace FarseerPhysics.Dynamics.Joints
         /// <param name="localAnchorB">The second body anchor.</param>
         /// <param name="minLength">The minimum length between anchorpoints</param>
         /// <param name="maxlength">The maximum length between anchorpoints.</param>
-        public SliderJoint(Body bodyA, Body bodyB, Vector2 localAnchorA, Vector2 localAnchorB, float minLength, float maxlength)
+        public SliderJoint(Body bodyA, Body bodyB, Vector2 localAnchorA, Vector2 localAnchorB, float minLength,
+                           float maxlength)
             : base(bodyA, bodyB)
         {
             JointType = JointType.Slider;
@@ -119,18 +123,18 @@ namespace FarseerPhysics.Dynamics.Joints
             set { Debug.Assert(false, "You can't set the world anchor on this joint type."); }
         }
 
-        public override Vector2 GetReactionForce(float invDt)
+        public override Vector2 GetReactionForce(float inv_dt)
         {
-            Vector2 F = (invDt * _impulse) * _u;
+            Vector2 F = (inv_dt * _impulse) * _u;
             return F;
         }
 
-        public override float GetReactionTorque(float invDt)
+        public override float GetReactionTorque(float inv_dt)
         {
             return 0.0f;
         }
 
-        internal override void InitVelocityConstraints(ref SolverData data)
+        internal override void InitVelocityConstraints(ref TimeStep step)
         {
             Body b1 = BodyA;
             Body b2 = BodyB;
@@ -140,8 +144,8 @@ namespace FarseerPhysics.Dynamics.Joints
             b2.GetTransform(out xf2);
 
             // Compute the effective mass matrix.
-            Vector2 r1 = MathUtils.Mul(ref xf1.q, LocalAnchorA - b1.LocalCenter);
-            Vector2 r2 = MathUtils.Mul(ref xf2.q, LocalAnchorB - b2.LocalCenter);
+            Vector2 r1 = MathUtils.Multiply(ref xf1.R, LocalAnchorA - b1.LocalCenter);
+            Vector2 r2 = MathUtils.Multiply(ref xf2.R, LocalAnchorB - b2.LocalCenter);
             _u = b2.Sweep.C + r2 - b1.Sweep.C - r1;
 
             // Handle singularity.
@@ -181,9 +185,9 @@ namespace FarseerPhysics.Dynamics.Joints
                 float k = _mass * omega * omega;
 
                 // magic formulas
-                _gamma = data.step.dt * (d + data.step.dt * k);
+                _gamma = step.dt * (d + step.dt * k);
                 _gamma = _gamma != 0.0f ? 1.0f / _gamma : 0.0f;
-                _bias = C * data.step.dt * k * _gamma;
+                _bias = C * step.dt * k * _gamma;
 
                 _mass = invMass + _gamma;
                 _mass = _mass != 0.0f ? 1.0f / _mass : 0.0f;
@@ -192,7 +196,7 @@ namespace FarseerPhysics.Dynamics.Joints
             if (Settings.EnableWarmstarting)
             {
                 // Scale the impulse to support a variable time step.
-                _impulse *= data.step.dtRatio;
+                _impulse *= step.dtRatio;
 
                 Vector2 P = _impulse * _u;
                 b1.LinearVelocityInternal -= b1.InvMass * P;
@@ -206,7 +210,7 @@ namespace FarseerPhysics.Dynamics.Joints
             }
         }
 
-        internal override void SolveVelocityConstraints(ref SolverData data)
+        internal override void SolveVelocityConstraints(ref TimeStep step)
         {
             Body b1 = BodyA;
             Body b2 = BodyB;
@@ -215,8 +219,8 @@ namespace FarseerPhysics.Dynamics.Joints
             b1.GetTransform(out xf1);
             b2.GetTransform(out xf2);
 
-            Vector2 r1 = MathUtils.Mul(ref xf1.q, LocalAnchorA - b1.LocalCenter);
-            Vector2 r2 = MathUtils.Mul(ref xf2.q, LocalAnchorB - b2.LocalCenter);
+            Vector2 r1 = MathUtils.Multiply(ref xf1.R, LocalAnchorA - b1.LocalCenter);
+            Vector2 r2 = MathUtils.Multiply(ref xf2.R, LocalAnchorB - b2.LocalCenter);
 
             Vector2 d = b2.Sweep.C + r2 - b1.Sweep.C - r1;
 
@@ -242,7 +246,7 @@ namespace FarseerPhysics.Dynamics.Joints
             b2.AngularVelocityInternal += b2.InvI * MathUtils.Cross(r2, P);
         }
 
-        internal override bool SolvePositionConstraints(ref SolverData data)
+        internal override bool SolvePositionConstraints()
         {
             if (Frequency > 0.0f)
             {
@@ -257,8 +261,8 @@ namespace FarseerPhysics.Dynamics.Joints
             b1.GetTransform(out xf1);
             b2.GetTransform(out xf2);
 
-            Vector2 r1 = MathUtils.Mul(ref xf1.q, LocalAnchorA - b1.LocalCenter);
-            Vector2 r2 = MathUtils.Mul(ref xf2.q, LocalAnchorB - b2.LocalCenter);
+            Vector2 r1 = MathUtils.Multiply(ref xf1.R, LocalAnchorA - b1.LocalCenter);
+            Vector2 r2 = MathUtils.Multiply(ref xf2.R, LocalAnchorB - b2.LocalCenter);
 
             Vector2 d = b2.Sweep.C + r2 - b1.Sweep.C - r1;
 

@@ -1,19 +1,20 @@
 module FunctionalGame.Physics
 
 open System
+open System.Diagnostics
 open System.Collections.Generic
 open FarseerPhysics
 open FarseerPhysics.Common
 open FarseerPhysics.Collision
 open FarseerPhysics.Dynamics
+open FarseerPhysics.Factories
 
 
 let private CreateDynamicFixture world displayWidth displayHeight x y =
-    let position = Nullable<Microsoft.Xna.Framework.Vector2> (new Microsoft.Xna.Framework.Vector2(x, y))
-    let body = new Body (world, position)
-    let width = ConvertUnits.ToSimUnits(displayWidth / 2.f)
-    let height = ConvertUnits.ToSimUnits(displayHeight / 2.f)
-    let shape = new Shapes.PolygonShape (PolygonTools.CreateRectangle(width, height), 1.0f)
+    let width = ConvertUnits.ToSimUnits (displayWidth / 2.f)
+    let height = ConvertUnits.ToSimUnits (displayHeight / 2.f)
+    let body = BodyFactory.CreateBody (world, new Microsoft.Xna.Framework.Vector2 (x, y))
+    let shape = new Shapes.PolygonShape (PolygonTools.CreateRectangle (width, height), 1.0f)
     let fixture = body.CreateFixture shape
     
     fixture.Restitution <- 0.4f
@@ -24,21 +25,19 @@ let private CreateDynamicFixture world displayWidth displayHeight x y =
 
 
 let private CreateFloor world x y =
-    let position = Nullable<Microsoft.Xna.Framework.Vector2> (new Microsoft.Xna.Framework.Vector2 (x, y))
-    let body = new Body (world, position)    
+    let body = BodyFactory.CreateBody (world, new Microsoft.Xna.Framework.Vector2 (x, y))  
     let shape = new Shapes.PolygonShape (PolygonTools.CreateRectangle(1000.0f, 0.1f), 1.f)
     body.CreateFixture shape |> ignore
 
 
 type PhysicsObject = { Id: int; X: float32; Y: float32; Rotation: float32 }
 
-type PhysicsEngine (gravityX, gravityY) as this =
+type PhysicsEngine (gravityX, gravityY) =
     let mutable fixtureLookup = new Dictionary<int, Fixture> ()
     let mutable counter = 0
     let world = new World (new Microsoft.Xna.Framework.Vector2 (gravityX, gravityY))
 
     do
-        ConvertUnits.SetDisplayUnitToSimUnitRatio 64.f
         CreateFloor world 0.0f (ConvertUnits.ToSimUnits (720.f))
 
     member this.CreateObject width height x y =

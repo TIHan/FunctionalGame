@@ -1,9 +1,12 @@
 /*
-* Farseer Physics Engine:
-* Copyright (c) 2012 Ian Qvist
+* Farseer Physics Engine based on Box2D.XNA port:
+* Copyright (c) 2010 Ian Qvist
 * 
+* Box2D.XNA port of Box2D:
+* Copyright (c) 2009 Brandon Furtwangler, Nathan Furtwangler
+*
 * Original source Box2D:
-* Copyright (c) 2006-2011 Erin Catto http://www.box2d.org 
+* Copyright (c) 2006-2009 Erin Catto http://www.gphysics.com 
 * 
 * This software is provided 'as-is', without any express or implied 
 * warranty.  In no event will the authors be held liable for any damages 
@@ -26,14 +29,6 @@ using Microsoft.Xna.Framework;
 
 namespace FarseerPhysics.Dynamics.Joints
 {
-    // p = attached point, m = mouse point
-    // C = p - m
-    // Cdot = v
-    //      = v + cross(w, r)
-    // J = [I r_skew]
-    // Identity used:
-    // w k % (rx i + ry j) = w * (-ry i + rx j)
-
     /// <summary>
     /// A mouse joint is used to make a point on a body track a
     /// specified world point. This a soft constraint with a maximum
@@ -45,25 +40,14 @@ namespace FarseerPhysics.Dynamics.Joints
     /// </summary>
     public class FixedMouseJoint : Joint
     {
-        private Vector2 _targetA;
-        private float _frequency;
-        private float _dampingRatio;
+        public Vector2 LocalAnchorA;
+        private Vector2 _C; // position error
         private float _beta;
-
-        // Solver shared
-        private Vector2 _impulse;
-        private float _maxForce;
         private float _gamma;
+        private Vector2 _impulse;
+        private Mat22 _mass; // effective mass for point-to-point constraint.
 
-        // Solver temp
-        private int _indexA;
-        private int _indexB;
-        private Vector2 _rB;
-        private Vector2 _localCenterB;
-        private float _invMassB;
-        private float _invIB;
-        private Mat22 _mass;
-        private Vector2 _C;
+        private Vector2 _worldAnchor;
 
         /// <summary>
         /// This requires a world target point,
@@ -77,28 +61,28 @@ namespace FarseerPhysics.Dynamics.Joints
             JointType = JointType.FixedMouse;
             Frequency = 5.0f;
             DampingRatio = 0.7f;
-            MaxForce = 1000 * body.Mass;
 
             Debug.Assert(worldAnchor.IsValid());
 
-            _targetA = worldAnchor;
-            LocalAnchorB = MathUtils.MulT(BodyA.Xf, worldAnchor);
-        }
+            Transform xf1;
+            BodyA.GetTransform(out xf1);
 
-        public Vector2 LocalAnchorB { get; set; }
+            _worldAnchor = worldAnchor;
+            LocalAnchorA = BodyA.GetLocalPoint(worldAnchor);
+        }
 
         public override Vector2 WorldAnchorA
         {
-            get { return BodyA.GetWorldPoint(LocalAnchorB); }
+            get { return BodyA.GetWorldPoint(LocalAnchorA); }
         }
 
         public override Vector2 WorldAnchorB
         {
-            get { return _targetA; }
+            get { return _worldAnchor; }
             set
             {
                 BodyA.Awake = true;
-                _targetA = value;
+                _worldAnchor = value;
             }
         }
 
@@ -107,67 +91,33 @@ namespace FarseerPhysics.Dynamics.Joints
         /// to move the candidate body. Usually you will express
         /// as some multiple of the weight (multiplier * mass * gravity).
         /// </summary>
-        public float MaxForce
-        {
-            get { return _maxForce; }
-            set
-            {
-                Debug.Assert(MathUtils.IsValid(value) && value >= 0.0f);
-                _maxForce = value;
-            }
-        }
+        public float MaxForce { get; set; }
 
         /// <summary>
         /// The response speed.
         /// </summary>
-        public float Frequency
-        {
-            get { return _frequency; }
-            set
-            {
-                Debug.Assert(MathUtils.IsValid(value) && value >= 0.0f);
-                _frequency = value;
-            }
-        }
+        public float Frequency { get; set; }
 
         /// <summary>
         /// The damping ratio. 0 = no damping, 1 = critical damping.
         /// </summary>
-        public float DampingRatio
+        public float DampingRatio { get; set; }
+
+        public override Vector2 GetReactionForce(float inv_dt)
         {
-            get { return _dampingRatio; }
-            set
-            {
-                Debug.Assert(MathUtils.IsValid(value) && value >= 0.0f);
-                _dampingRatio = value;
-            }
+            return inv_dt * _impulse;
         }
 
-        public override Vector2 GetReactionForce(float invDt)
+        public override float GetReactionTorque(float inv_dt)
         {
-            return invDt * _impulse;
+            return inv_dt * 0.0f;
         }
 
-        public override float GetReactionTorque(float invDt)
+        internal override void InitVelocityConstraints(ref TimeStep step)
         {
-            return invDt * 0.0f;
-        }
+            Body b = BodyA;
 
-        internal override void InitVelocityConstraints(ref SolverData data)
-        {
-            _indexB = BodyA.IslandIndex;
-            _localCenterB = BodyA.Sweep.LocalCenter;
-            _invMassB = BodyA.InvMass;
-            _invIB = BodyA.InvI;
-
-            Vector2 cB = data.positions[_indexB].c;
-            float aB = data.positions[_indexB].a;
-            Vector2 vB = data.velocities[_indexB].v;
-            float wB = data.velocities[_indexB].w;
-
-            Rot qB = new Rot(aB);
-
-            float mass = BodyA.Mass;
+            float mass = b.Mass;
 
             // Frequency
             float omega = 2.0f * Settings.Pi * Frequency;
@@ -181,76 +131,77 @@ namespace FarseerPhysics.Dynamics.Joints
             // magic formulas
             // gamma has units of inverse mass.
             // beta has units of inverse time.
-            float h = data.step.dt;
-            Debug.Assert(d + h * k > Settings.Epsilon);
-            _gamma = h * (d + h * k);
+            Debug.Assert(d + step.dt * k > Settings.Epsilon);
+
+            _gamma = step.dt * (d + step.dt * k);
             if (_gamma != 0.0f)
             {
                 _gamma = 1.0f / _gamma;
             }
 
-            _beta = h * k * _gamma;
+            _beta = step.dt * k * _gamma;
 
             // Compute the effective mass matrix.
-            _rB = MathUtils.Mul(qB, LocalAnchorB - _localCenterB);
+            Transform xf1;
+            b.GetTransform(out xf1);
+            Vector2 r = MathUtils.Multiply(ref xf1.R, LocalAnchorA - b.LocalCenter);
+
             // K    = [(1/m1 + 1/m2) * eye(2) - skew(r1) * invI1 * skew(r1) - skew(r2) * invI2 * skew(r2)]
             //      = [1/m1+1/m2     0    ] + invI1 * [r1.Y*r1.Y -r1.X*r1.Y] + invI2 * [r1.Y*r1.Y -r1.X*r1.Y]
             //        [    0     1/m1+1/m2]           [-r1.X*r1.Y r1.X*r1.X]           [-r1.X*r1.Y r1.X*r1.X]
-            Mat22 K = new Mat22();
-            K.ex.X = _invMassB + _invIB * _rB.Y * _rB.Y + _gamma;
-            K.ex.Y = -_invIB * _rB.X * _rB.Y;
-            K.ey.X = K.ex.Y;
-            K.ey.Y = _invMassB + _invIB * _rB.X * _rB.X + _gamma;
+            float invMass = b.InvMass;
+            float invI = b.InvI;
+
+            Mat22 K1 = new Mat22(new Vector2(invMass, 0.0f), new Vector2(0.0f, invMass));
+            Mat22 K2 = new Mat22(new Vector2(invI * r.Y * r.Y, -invI * r.X * r.Y),
+                                 new Vector2(-invI * r.X * r.Y, invI * r.X * r.X));
+
+            Mat22 K;
+            Mat22.Add(ref K1, ref K2, out K);
+
+            K.Col1.X += _gamma;
+            K.Col2.Y += _gamma;
 
             _mass = K.Inverse;
 
-            _C = cB + _rB - _targetA;
-            _C *= _beta;
+            _C = b.Sweep.C + r - _worldAnchor;
 
             // Cheat with some damping
-            wB *= 0.98f;
+            b.AngularVelocityInternal *= 0.98f;
 
-            if (Settings.EnableWarmstarting)
-            {
-                _impulse *= data.step.dtRatio;
-                vB += _invMassB * _impulse;
-                wB += _invIB * MathUtils.Cross(_rB, _impulse);
-            }
-            else
-            {
-                _impulse = Vector2.Zero;
-            }
-
-            data.velocities[_indexB].v = vB;
-            data.velocities[_indexB].w = wB;
+            // Warm starting.
+            _impulse *= step.dtRatio;
+            b.LinearVelocityInternal += invMass * _impulse;
+            b.AngularVelocityInternal += invI * MathUtils.Cross(r, _impulse);
         }
 
-        internal override void SolveVelocityConstraints(ref SolverData data)
+        internal override void SolveVelocityConstraints(ref TimeStep step)
         {
-            Vector2 vB = data.velocities[_indexB].v;
-            float wB = data.velocities[_indexB].w;
+            Body b = BodyA;
+
+            Transform xf1;
+            b.GetTransform(out xf1);
+
+            Vector2 r = MathUtils.Multiply(ref xf1.R, LocalAnchorA - b.LocalCenter);
 
             // Cdot = v + cross(w, r)
-            Vector2 Cdot = vB + MathUtils.Cross(wB, _rB);
-            Vector2 impulse = MathUtils.Mul(ref _mass, -(Cdot + _C + _gamma * _impulse));
+            Vector2 Cdot = b.LinearVelocityInternal + MathUtils.Cross(b.AngularVelocityInternal, r);
+            Vector2 impulse = MathUtils.Multiply(ref _mass, -(Cdot + _beta * _C + _gamma * _impulse));
 
             Vector2 oldImpulse = _impulse;
             _impulse += impulse;
-            float maxImpulse = data.step.dt * MaxForce;
+            float maxImpulse = step.dt * MaxForce;
             if (_impulse.LengthSquared() > maxImpulse * maxImpulse)
             {
                 _impulse *= maxImpulse / _impulse.Length();
             }
             impulse = _impulse - oldImpulse;
 
-            vB += _invMassB * impulse;
-            wB += _invIB * MathUtils.Cross(_rB, impulse);
-
-            data.velocities[_indexB].v = vB;
-            data.velocities[_indexB].w = wB;
+            b.LinearVelocityInternal += b.InvMass * impulse;
+            b.AngularVelocityInternal += b.InvI * MathUtils.Cross(r, impulse);
         }
 
-        internal override bool SolvePositionConstraints(ref SolverData data)
+        internal override bool SolvePositionConstraints()
         {
             return true;
         }

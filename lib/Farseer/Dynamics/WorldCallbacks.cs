@@ -1,9 +1,12 @@
 ﻿/*
-* Farseer Physics Engine:
-* Copyright (c) 2012 Ian Qvist
+* Farseer Physics Engine based on Box2D.XNA port:
+* Copyright (c) 2010 Ian Qvist
 * 
+* Box2D.XNA port of Box2D:
+* Copyright (c) 2009 Brandon Furtwangler, Nathan Furtwangler
+*
 * Original source Box2D:
-* Copyright (c) 2006-2011 Erin Catto http://www.box2d.org 
+* Copyright (c) 2006-2009 Erin Catto http://www.gphysics.com 
 * 
 * This software is provided 'as-is', without any express or implied 
 * warranty.  In no event will the authors be held liable for any damages 
@@ -24,9 +27,17 @@ using FarseerPhysics.Collision;
 using FarseerPhysics.Controllers;
 using FarseerPhysics.Dynamics.Contacts;
 using FarseerPhysics.Dynamics.Joints;
+using Microsoft.Xna.Framework;
 
 namespace FarseerPhysics.Dynamics
 {
+    /// <summary>
+    /// Called for each fixture found in the query. You control how the ray cast
+    /// proceeds by returning a float:
+    /// <returns>-1 to filter, 0 to terminate, fraction to clip the ray for closest hit, 1 to continue</returns>
+    /// </summary>
+    public delegate float RayCastCallback(Fixture fixture, Vector2 point, Vector2 normal, float fraction);
+
     /// <summary>
     /// This delegate is called when a contact is deleted
     /// </summary>
@@ -39,7 +50,7 @@ namespace FarseerPhysics.Dynamics
 
     public delegate void PreSolveDelegate(Contact contact, ref Manifold oldManifold);
 
-    public delegate void PostSolveDelegate(Contact contact, ContactVelocityConstraint impulse);
+    public delegate void PostSolveDelegate(Contact contact, ContactConstraint impulse);
 
     public delegate void FixtureDelegate(Fixture fixture);
 
@@ -57,7 +68,7 @@ namespace FarseerPhysics.Dynamics
 
     public delegate bool OnCollisionEventHandler(Fixture fixtureA, Fixture fixtureB, Contact contact);
 
-    public delegate void AfterCollisionEventHandler(Fixture fixtureA, Fixture fixtureB, Contact contact, ContactVelocityConstraint impulse);
+    public delegate void AfterCollisionEventHandler(Fixture fixtureA, Fixture fixtureB, Contact contact);
 
     public delegate void OnSeparationEventHandler(Fixture fixtureA, Fixture fixtureB);
 }

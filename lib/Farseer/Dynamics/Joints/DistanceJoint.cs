@@ -1,9 +1,12 @@
 /*
-* Farseer Physics Engine:
-* Copyright (c) 2012 Ian Qvist
+* Farseer Physics Engine based on Box2D.XNA port:
+* Copyright (c) 2010 Ian Qvist
 * 
+* Box2D.XNA port of Box2D:
+* Copyright (c) 2009 Brandon Furtwangler, Nathan Furtwangler
+*
 * Original source Box2D:
-* Copyright (c) 2006-2011 Erin Catto http://www.box2d.org 
+* Copyright (c) 2006-2009 Erin Catto http://www.gphysics.com 
 * 
 * This software is provided 'as-is', without any express or implied 
 * warranty.  In no event will the authors be held liable for any damages 
@@ -49,7 +52,6 @@ namespace FarseerPhysics.Dynamics.Joints
     /// </summary>
     public class DistanceJoint : Joint
     {
-        // Solver shared
         /// <summary>
         /// The local anchor point relative to bodyA's origin.
         /// </summary>
@@ -63,20 +65,10 @@ namespace FarseerPhysics.Dynamics.Joints
         private float _bias;
         private float _gamma;
         private float _impulse;
-
-        // Solver temp
-        private int _indexA;
-        private int _indexB;
-        private Vector2 _u;
-        private Vector2 _rA;
-        private Vector2 _rB;
-        private Vector2 _localCenterA;
-        private Vector2 _localCenterB;
-        private float _invMassA;
-        private float _invMassB;
-        private float _invIA;
-        private float _invIB;
         private float _mass;
+        private float _tmpFloat1;
+        private Vector2 _tmpVector1;
+        private Vector2 _u;
 
         internal DistanceJoint()
         {
@@ -95,26 +87,16 @@ namespace FarseerPhysics.Dynamics.Joints
         /// <param name="bodyB">The second body</param>
         /// <param name="localAnchorA">The first body anchor</param>
         /// <param name="localAnchorB">The second body anchor</param>
-        public DistanceJoint(Body bodyA, Body bodyB, Vector2 localAnchorA, Vector2 localAnchorB, bool useWorldCoordinates = true)
+        public DistanceJoint(Body bodyA, Body bodyB, Vector2 localAnchorA, Vector2 localAnchorB)
             : base(bodyA, bodyB)
         {
             JointType = JointType.Distance;
 
-            if (useWorldCoordinates)
-            {
-                LocalAnchorA = bodyA.GetLocalPoint(localAnchorA);
-                LocalAnchorB = bodyB.GetLocalPoint(localAnchorB);
+            LocalAnchorA = localAnchorA;
+            LocalAnchorB = localAnchorB;
 
-                Vector2 d = localAnchorB - localAnchorA;
-                Length = d.Length();
-
-            }
-            else
-            {
-                LocalAnchorA = localAnchorA;
-                LocalAnchorB = localAnchorB;
-                Length = (BodyB.GetWorldPoint(ref LocalAnchorB) - BodyA.GetWorldPoint(ref LocalAnchorA)).Length();
-            }
+            Vector2 d = WorldAnchorB - WorldAnchorA;
+            Length = d.Length();
         }
 
         /// <summary>
@@ -124,8 +106,7 @@ namespace FarseerPhysics.Dynamics.Joints
         public float Length { get; set; }
 
         /// <summary>
-        /// The mass-spring-damper frequency in Hertz. A value of 0
-        /// disables softness.
+        /// The mass-spring-damper frequency in Hertz.
         /// </summary>
         public float Frequency { get; set; }
 
@@ -145,54 +126,26 @@ namespace FarseerPhysics.Dynamics.Joints
             set { Debug.Assert(false, "You can't set the world anchor on this joint type."); }
         }
 
-        /// <summary>
-        /// Get the reaction force given the inverse time step. Unit is N.
-        /// </summary>
-        /// <param name="invDt"></param>
-        /// <returns></returns>
-        public override Vector2 GetReactionForce(float invDt)
+        public override Vector2 GetReactionForce(float inv_dt)
         {
-            Vector2 F = (invDt * _impulse) * _u;
+            Vector2 F = (inv_dt * _impulse) * _u;
             return F;
         }
 
-        /// <summary>
-        /// Get the reaction torque given the inverse time step.
-        /// Unit is N*m. This is always zero for a distance joint.
-        /// </summary>
-        /// <param name="invDt"></param>
-        /// <returns></returns>
-        public override float GetReactionTorque(float invDt)
+        public override float GetReactionTorque(float inv_dt)
         {
             return 0.0f;
         }
 
-        internal override void InitVelocityConstraints(ref SolverData data)
+        internal override void InitVelocityConstraints(ref TimeStep step)
         {
-            _indexA = BodyA.IslandIndex;
-            _indexB = BodyB.IslandIndex;
-            _localCenterA = BodyA.Sweep.LocalCenter;
-            _localCenterB = BodyB.Sweep.LocalCenter;
-            _invMassA = BodyA.InvMass;
-            _invMassB = BodyB.InvMass;
-            _invIA = BodyA.InvI;
-            _invIB = BodyB.InvI;
+            Body b1 = BodyA;
+            Body b2 = BodyB;
 
-            Vector2 cA = data.positions[_indexA].c;
-            float aA = data.positions[_indexA].a;
-            Vector2 vA = data.velocities[_indexA].v;
-            float wA = data.velocities[_indexA].w;
-
-            Vector2 cB = data.positions[_indexB].c;
-            float aB = data.positions[_indexB].a;
-            Vector2 vB = data.velocities[_indexB].v;
-            float wB = data.velocities[_indexB].w;
-
-            Rot qA = new Rot(aA), qB = new Rot(aB);
-
-            _rA = MathUtils.Mul(qA, LocalAnchorA - _localCenterA);
-            _rB = MathUtils.Mul(qB, LocalAnchorB - _localCenterB);
-            _u = cB + _rB - cA - _rA;
+            // Compute the effective mass matrix.
+            Vector2 r1 = MathUtils.Multiply(ref b1.Xf.R, LocalAnchorA - b1.LocalCenter);
+            Vector2 r2 = MathUtils.Multiply(ref b2.Xf.R, LocalAnchorB - b2.LocalCenter);
+            _u = b2.Sweep.C + r2 - b1.Sweep.C - r1;
 
             // Handle singularity.
             float length = _u.Length();
@@ -205,11 +158,11 @@ namespace FarseerPhysics.Dynamics.Joints
                 _u = Vector2.Zero;
             }
 
-            float crAu = MathUtils.Cross(_rA, _u);
-            float crBu = MathUtils.Cross(_rB, _u);
-            float invMass = _invMassA + _invIA * crAu * crAu + _invMassB + _invIB * crBu * crBu;
-
-            // Compute the effective mass matrix.
+            float cr1u, cr2u;
+            MathUtils.Cross(ref r1, ref _u, out cr1u);
+            MathUtils.Cross(ref r2, ref _u, out cr2u);
+            float invMass = b1.InvMass + b1.InvI * cr1u * cr1u + b2.InvMass + b2.InvI * cr2u * cr2u;
+            Debug.Assert(invMass > Settings.Epsilon);
             _mass = invMass != 0.0f ? 1.0f / invMass : 0.0f;
 
             if (Frequency > 0.0f)
@@ -226,71 +179,65 @@ namespace FarseerPhysics.Dynamics.Joints
                 float k = _mass * omega * omega;
 
                 // magic formulas
-                float h = data.step.dt;
-                _gamma = h * (d + h * k);
+                _gamma = step.dt * (d + step.dt * k);
                 _gamma = _gamma != 0.0f ? 1.0f / _gamma : 0.0f;
-                _bias = C * h * k * _gamma;
+                _bias = C * step.dt * k * _gamma;
 
-                invMass += _gamma;
-                _mass = invMass != 0.0f ? 1.0f / invMass : 0.0f;
-            }
-            else
-            {
-                _gamma = 0.0f;
-                _bias = 0.0f;
+                _mass = invMass + _gamma;
+                _mass = _mass != 0.0f ? 1.0f / _mass : 0.0f;
             }
 
             if (Settings.EnableWarmstarting)
             {
                 // Scale the impulse to support a variable time step.
-                _impulse *= data.step.dtRatio;
+                _impulse *= step.dtRatio;
 
                 Vector2 P = _impulse * _u;
-                vA -= _invMassA * P;
-                wA -= _invIA * MathUtils.Cross(_rA, P);
-                vB += _invMassB * P;
-                wB += _invIB * MathUtils.Cross(_rB, P);
+                b1.LinearVelocityInternal -= b1.InvMass * P;
+                MathUtils.Cross(ref r1, ref P, out _tmpFloat1);
+                b1.AngularVelocityInternal -= b1.InvI * /* r1 x P */ _tmpFloat1;
+                b2.LinearVelocityInternal += b2.InvMass * P;
+                MathUtils.Cross(ref r2, ref P, out _tmpFloat1);
+                b2.AngularVelocityInternal += b2.InvI * /* r2 x P */ _tmpFloat1;
             }
             else
             {
                 _impulse = 0.0f;
             }
-
-            data.velocities[_indexA].v = vA;
-            data.velocities[_indexA].w = wA;
-            data.velocities[_indexB].v = vB;
-            data.velocities[_indexB].w = wB;
         }
 
-        internal override void SolveVelocityConstraints(ref SolverData data)
+        internal override void SolveVelocityConstraints(ref TimeStep step)
         {
-            Vector2 vA = data.velocities[_indexA].v;
-            float wA = data.velocities[_indexA].w;
-            Vector2 vB = data.velocities[_indexB].v;
-            float wB = data.velocities[_indexB].w;
+            Body b1 = BodyA;
+            Body b2 = BodyB;
+
+            Transform xf1, xf2;
+            b1.GetTransform(out xf1);
+            b2.GetTransform(out xf2);
+
+            Vector2 r1 = MathUtils.Multiply(ref xf1.R, LocalAnchorA - b1.LocalCenter);
+            Vector2 r2 = MathUtils.Multiply(ref xf2.R, LocalAnchorB - b2.LocalCenter);
 
             // Cdot = dot(u, v + cross(w, r))
-            Vector2 vpA = vA + MathUtils.Cross(wA, _rA);
-            Vector2 vpB = vB + MathUtils.Cross(wB, _rB);
-            float Cdot = Vector2.Dot(_u, vpB - vpA);
+            MathUtils.Cross(b1.AngularVelocityInternal, ref r1, out _tmpVector1);
+            Vector2 v1 = b1.LinearVelocityInternal + _tmpVector1;
+            MathUtils.Cross(b2.AngularVelocityInternal, ref r2, out _tmpVector1);
+            Vector2 v2 = b2.LinearVelocityInternal + _tmpVector1;
+            float Cdot = Vector2.Dot(_u, v2 - v1);
 
             float impulse = -_mass * (Cdot + _bias + _gamma * _impulse);
             _impulse += impulse;
 
             Vector2 P = impulse * _u;
-            vA -= _invMassA * P;
-            wA -= _invIA * MathUtils.Cross(_rA, P);
-            vB += _invMassB * P;
-            wB += _invIB * MathUtils.Cross(_rB, P);
-
-            data.velocities[_indexA].v = vA;
-            data.velocities[_indexA].w = wA;
-            data.velocities[_indexB].v = vB;
-            data.velocities[_indexB].w = wB;
-
+            b1.LinearVelocityInternal -= b1.InvMass * P;
+            MathUtils.Cross(ref r1, ref P, out _tmpFloat1);
+            b1.AngularVelocityInternal -= b1.InvI * _tmpFloat1;
+            b2.LinearVelocityInternal += b2.InvMass * P;
+            MathUtils.Cross(ref r2, ref P, out _tmpFloat1);
+            b2.AngularVelocityInternal += b2.InvI * _tmpFloat1;
         }
 
-        internal override bool SolvePositionConstraints(ref SolverData data)
+        internal override bool SolvePositionConstraints()
         {
             if (Frequency > 0.0f)
             {
@@ -298,33 +245,40 @@ namespace FarseerPhysics.Dynamics.Joints
                 return true;
             }
 
-            Vector2 cA = data.positions[_indexA].c;
-            float aA = data.positions[_indexA].a;
-            Vector2 cB = data.positions[_indexB].c;
-            float aB = data.positions[_indexB].a;
+            Body b1 = BodyA;
+            Body b2 = BodyB;
 
-            Rot qA = new Rot(aA), qB = new Rot(aB);
+            Transform xf1, xf2;
+            b1.GetTransform(out xf1);
+            b2.GetTransform(out xf2);
 
-            Vector2 rA = MathUtils.Mul(qA, LocalAnchorA - _localCenterA);
-            Vector2 rB = MathUtils.Mul(qB, LocalAnchorB - _localCenterB);
-            Vector2 u = cB + rB - cA - rA;
+            Vector2 r1 = MathUtils.Multiply(ref xf1.R, LocalAnchorA - b1.LocalCenter);
+            Vector2 r2 = MathUtils.Multiply(ref xf2.R, LocalAnchorB - b2.LocalCenter);
 
-            float length = u.Length(); u.Normalize();
+            Vector2 d = b2.Sweep.C + r2 - b1.Sweep.C - r1;
+
+            float length = d.Length();
+
+            if (length == 0.0f)
+                return true;
+
+            d /= length;
             float C = length - Length;
             C = MathUtils.Clamp(C, -Settings.MaxLinearCorrection, Settings.MaxLinearCorrection);
 
             float impulse = -_mass * C;
-            Vector2 P = impulse * u;
+            _u = d;
+            Vector2 P = impulse * _u;
 
-            cA -= _invMassA * P;
-            aA -= _invIA * MathUtils.Cross(rA, P);
-            cB += _invMassB * P;
-            aB += _invIB * MathUtils.Cross(rB, P);
+            b1.Sweep.C -= b1.InvMass * P;
+            MathUtils.Cross(ref r1, ref P, out _tmpFloat1);
+            b1.Sweep.A -= b1.InvI * _tmpFloat1;
+            b2.Sweep.C += b2.InvMass * P;
+            MathUtils.Cross(ref r2, ref P, out _tmpFloat1);
+            b2.Sweep.A += b2.InvI * _tmpFloat1;
 
-            data.positions[_indexA].c = cA;
-            data.positions[_indexA].a = aA;
-            data.positions[_indexB].c = cB;
-            data.positions[_indexB].a = aB;
+            b1.SynchronizeTransform();
+            b2.SynchronizeTransform();
 
             return Math.Abs(C) < Settings.LinearSlop;
         }

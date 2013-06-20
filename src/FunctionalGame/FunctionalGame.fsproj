@@ -229,7 +229,11 @@
       <Project>{A4610E4C-DD34-428B-BABB-779CA0B5993A}</Project>
       <Name>Farseer Physics</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\OpenF\OpenF.fsproj">
+    <ProjectReference Include="..\..\lib\FarseerExtensions\FarseerExtensions.csproj">
+      <Project>{78E4EBAF-5883-4F36-ABC4-5676618517FB}</Project>
+      <Name>FarseerExtensions</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\lib\OpenF\OpenF.fsproj">
       <Project>{267A9D74-9B20-497C-8753-A8DECAAE0DEA}</Project>
       <Name>OpenF</Name>
     </ProjectReference>

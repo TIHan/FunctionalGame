@@ -33,9 +33,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace FarseerPhysics.Common.Decomposition.CDT.Util
+namespace Poly2Tri.Triangulation.Util
 {
-    internal struct FixedArray3<T> : IEnumerable<T> where T : class
+    public struct FixedArray3<T> : IEnumerable<T> where T : class
     {
         public T _0, _1, _2;
 

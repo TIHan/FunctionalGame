@@ -30,11 +30,11 @@
  */
 
 using System;
-using FarseerPhysics.Common.Decomposition.CDT.Polygon;
+using Poly2Tri.Triangulation.Polygon;
 
-namespace FarseerPhysics.Common.Decomposition.CDT.Util
+namespace Poly2Tri.Triangulation.Util
 {
-    internal class PolygonGenerator
+    public class PolygonGenerator
     {
         private static readonly Random RNG = new Random();
 

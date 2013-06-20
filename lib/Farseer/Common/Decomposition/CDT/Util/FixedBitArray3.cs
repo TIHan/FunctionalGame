@@ -33,9 +33,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace FarseerPhysics.Common.Decomposition.CDT.Util
+namespace Poly2Tri.Triangulation.Util
 {
-    internal struct FixedBitArray3 : IEnumerable<bool>
+    public struct FixedBitArray3 : IEnumerable<bool>
     {
         public bool _0, _1, _2;
 

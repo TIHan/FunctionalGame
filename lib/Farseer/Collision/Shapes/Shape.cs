@@ -1,9 +1,12 @@
 ﻿/*
-* Farseer Physics Engine:
-* Copyright (c) 2012 Ian Qvist
+* Farseer Physics Engine based on Box2D.XNA port:
+* Copyright (c) 2010 Ian Qvist
 * 
+* Box2D.XNA port of Box2D:
+* Copyright (c) 2009 Brandon Furtwangler, Nathan Furtwangler
+*
 * Original source Box2D:
-* Copyright (c) 2006-2011 Erin Catto http://www.box2d.org 
+* Copyright (c) 2006-2009 Erin Catto http://www.gphysics.com 
 * 
 * This software is provided 'as-is', without any express or implied 
 * warranty.  In no event will the authors be held liable for any damages 
@@ -21,7 +24,6 @@
 */
 
 using System;
-using System.Diagnostics;
 using FarseerPhysics.Common;
 using Microsoft.Xna.Framework;
 
@@ -35,58 +37,47 @@ namespace FarseerPhysics.Collision.Shapes
         /// <summary>
         /// The area of the shape
         /// </summary>
-        public float Area { get; internal set; }
+        public float Area;
 
         /// <summary>
         /// The position of the shape's centroid relative to the shape's origin.
         /// </summary>
-        public Vector2 Centroid { get; internal set; }
+        public Vector2 Centroid;
 
         /// <summary>
         /// The rotational inertia of the shape about the local origin.
         /// </summary>
-        public float Inertia { get; internal set; }
+        public float Inertia;
 
         /// <summary>
         /// The mass of the shape, usually in kilograms.
         /// </summary>
-        public float Mass { get; internal set; }
+        public float Mass;
 
-        /// <summary>
-        /// The equal operator
-        /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
-        public static bool operator ==(MassData left, MassData right)
-        {
-            return (left.Area == right.Area && left.Mass == right.Mass && left.Centroid == right.Centroid && left.Inertia == right.Inertia);
-        }
-
-        /// <summary>
-        /// The not equal operator
-        /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
-        public static bool operator !=(MassData left, MassData right)
-        {
-            return !(left == right);
-        }
+        #region IEquatable<MassData> Members
 
         public bool Equals(MassData other)
         {
             return this == other;
         }
 
+        #endregion
+
+        public static bool operator ==(MassData left, MassData right)
+        {
+            return (left.Area == right.Area && left.Mass == right.Mass && left.Centroid == right.Centroid &&
+                    left.Inertia == right.Inertia);
+        }
+
+        public static bool operator !=(MassData left, MassData right)
+        {
+            return !(left == right);
+        }
+
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj))
-                return false;
-
-            if (obj.GetType() != typeof(MassData))
-                return false;
-
+            if (ReferenceEquals(null, obj)) return false;
+            if (obj.GetType() != typeof(MassData)) return false;
             return Equals((MassData)obj);
         }
 
@@ -109,7 +100,7 @@ namespace FarseerPhysics.Collision.Shapes
         Circle = 0,
         Edge = 1,
         Polygon = 2,
-        Chain = 3,
+        Loop = 3,
         TypeCount = 4,
     }
 
@@ -120,6 +111,10 @@ namespace FarseerPhysics.Collision.Shapes
     /// </summary>
     public abstract class Shape
     {
+        private static int _shapeIdCounter;
+        public MassData MassData;
+        public int ShapeId;
+
         internal float _density;
         internal float _radius;
 
@@ -127,16 +122,8 @@ namespace FarseerPhysics.Collision.Shapes
         {
             _density = density;
             ShapeType = ShapeType.Unknown;
+            ShapeId = _shapeIdCounter++;
         }
-
-        /// <summary>
-        /// Contains the properties of the shape such as:
-        /// - Area of the shape
-        /// - Centroid
-        /// - Inertia
-        /// - Mass
-        /// </summary>
-        public MassData MassData;
 
         /// <summary>
         /// Get the type of this shape.
@@ -152,7 +139,6 @@ namespace FarseerPhysics.Collision.Shapes
 
         /// <summary>
         /// Gets or sets the density.
-        /// Changing the density causes a recalculation of shape properties.
         /// </summary>
         /// <value>The density.</value>
         public float Density
@@ -160,8 +146,6 @@ namespace FarseerPhysics.Collision.Shapes
             get { return _density; }
             set
             {
-                Debug.Assert(value >= 0);
-
                 _density = value;
                 ComputeProperties();
             }
@@ -169,15 +153,12 @@ namespace FarseerPhysics.Collision.Shapes
 
         /// <summary>
         /// Radius of the Shape
-        /// Changing the radius causes a recalculation of shape properties.
         /// </summary>
         public float Radius
         {
             get { return _radius; }
             set
             {
-                Debug.Assert(value >= 0);
-
                 _radius = value;
                 ComputeProperties();
             }
@@ -190,11 +171,10 @@ namespace FarseerPhysics.Collision.Shapes
         public abstract Shape Clone();
 
         /// <summary>
-        /// Test a point for containment in this shape.
-        /// Note: This only works for convex shapes.
+        /// Test a point for containment in this shape. This only works for convex shapes.
         /// </summary>
         /// <param name="transform">The shape world transform.</param>
-        /// <param name="point">A point in world coordinates.</param>
+        /// <param name="point">a point in world coordinates.</param>
         /// <returns>True if the point is inside the shape</returns>
         public abstract bool TestPoint(ref Transform transform, ref Vector2 point);
 
@@ -206,7 +186,8 @@ namespace FarseerPhysics.Collision.Shapes
         /// <param name="transform">The transform to be applied to the shape.</param>
         /// <param name="childIndex">The child shape index.</param>
         /// <returns>True if the ray-cast hits the shape</returns>
-        public abstract bool RayCast(out RayCastOutput output, ref RayCastInput input, ref Transform transform, int childIndex);
+        public abstract bool RayCast(out RayCastOutput output, ref RayCastInput input, ref Transform transform,
+                                     int childIndex);
 
         /// <summary>
         /// Given a transform, compute the associated axis aligned bounding box for a child shape.
@@ -220,13 +201,8 @@ namespace FarseerPhysics.Collision.Shapes
         /// Compute the mass properties of this shape using its dimensions and density.
         /// The inertia tensor is computed about the local origin, not the centroid.
         /// </summary>
-        protected abstract void ComputeProperties();
+        public abstract void ComputeProperties();
 
-        /// <summary>
-        /// Compare this shape to another shape based on type and properties.
-        /// </summary>
-        /// <param name="shape">The other shape</param>
-        /// <returns>True if the two shapes are the same.</returns>
         public bool CompareTo(Shape shape)
         {
             if (shape is PolygonShape && this is PolygonShape)
@@ -241,9 +217,6 @@ namespace FarseerPhysics.Collision.Shapes
             return false;
         }
 
-        /// <summary>
-        /// Used for the buoyancy controller
-        /// </summary>
-        public abstract float ComputeSubmergedArea(ref Vector2 normal, float offset, ref Transform xf, out Vector2 sc);
+        public abstract float ComputeSubmergedArea(Vector2 normal, float offset, Transform xf, out Vector2 sc);
     }
 }

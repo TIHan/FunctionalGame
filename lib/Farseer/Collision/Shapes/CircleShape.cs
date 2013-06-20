@@ -1,50 +1,41 @@
 ﻿/*
-* Farseer Physics Engine:
-* Copyright (c) 2012 Ian Qvist
+* Farseer Physics Engine based on Box2D.XNA port:
+* Copyright (c) 2010 Ian Qvist
 * 
-* Original source Box2D:
-* Copyright (c) 2006-2011 Erin Catto http://www.box2d.org
+* Box2D.XNA port of Box2D:
+* Copyright (c) 2009 Brandon Furtwangler, Nathan Furtwangler
 *
-* This software is provided 'as-is', without any express or implied
-* warranty.  In no event will the authors be held liable for any damages
-* arising from the use of this software.
-* Permission is granted to anyone to use this software for any purpose,
-* including commercial applications, and to alter it and redistribute it
-* freely, subject to the following restrictions:
-* 1. The origin of this software must not be misrepresented; you must not
-* claim that you wrote the original software. If you use this software
-* in a product, an acknowledgment in the product documentation would be
-* appreciated but is not required.
-* 2. Altered source versions must be plainly marked as such, and must not be
-* misrepresented as being the original software.
-* 3. This notice may not be removed or altered from any source distribution.
+* Original source Box2D:
+* Copyright (c) 2006-2009 Erin Catto http://www.gphysics.com 
+* 
+* This software is provided 'as-is', without any express or implied 
+* warranty.  In no event will the authors be held liable for any damages 
+* arising from the use of this software. 
+* Permission is granted to anyone to use this software for any purpose, 
+* including commercial applications, and to alter it and redistribute it 
+* freely, subject to the following restrictions: 
+* 1. The origin of this software must not be misrepresented; you must not 
+* claim that you wrote the original software. If you use this software 
+* in a product, an acknowledgment in the product documentation would be 
+* appreciated but is not required. 
+* 2. Altered source versions must be plainly marked as such, and must not be 
+* misrepresented as being the original software. 
+* 3. This notice may not be removed or altered from any source distribution. 
 */
 
 using System;
-using System.Diagnostics;
 using FarseerPhysics.Common;
 using Microsoft.Xna.Framework;
 
 namespace FarseerPhysics.Collision.Shapes
 {
-    /// <summary>
-    /// A circle shape.
-    /// </summary>
     public class CircleShape : Shape
     {
         internal Vector2 _position;
 
-        /// <summary>
-        /// Create a new circle with the desired radius and density.
-        /// </summary>
-        /// <param name="radius">The radius of the circle.</param>
-        /// <param name="density">The density of the circle.</param>
         public CircleShape(float radius, float density)
             : base(density)
         {
-            Debug.Assert(radius >= 0);
-            Debug.Assert(density >= 0);
-
             ShapeType = ShapeType.Circle;
             _radius = radius;
             _position = Vector2.Zero;
@@ -64,9 +55,6 @@ namespace FarseerPhysics.Collision.Shapes
             get { return 1; }
         }
 
-        /// <summary>
-        /// Get or set the position of the circle
-        /// </summary>
         public Vector2 Position
         {
             get { return _position; }
@@ -88,14 +76,29 @@ namespace FarseerPhysics.Collision.Shapes
             return shape;
         }
 
+        /// <summary>
+        /// Test a point for containment in this shape. This only works for convex shapes.
+        /// </summary>
+        /// <param name="transform">The shape world transform.</param>
+        /// <param name="point">a point in world coordinates.</param>
+        /// <returns>True if the point is inside the shape</returns>
         public override bool TestPoint(ref Transform transform, ref Vector2 point)
         {
-            Vector2 center = transform.p + MathUtils.Mul(transform.q, Position);
+            Vector2 center = transform.Position + MathUtils.Multiply(ref transform.R, Position);
             Vector2 d = point - center;
-            return Vector2.Dot(d, d) <= Radius * Radius; //TODO: Cache Radius*Radius
+            return Vector2.Dot(d, d) <= Radius * Radius;
         }
 
-        public override bool RayCast(out RayCastOutput output, ref RayCastInput input, ref Transform transform, int childIndex)
+        /// <summary>
+        /// Cast a ray against a child shape.
+        /// </summary>
+        /// <param name="output">The ray-cast results.</param>
+        /// <param name="input">The ray-cast input parameters.</param>
+        /// <param name="transform">The transform to be applied to the shape.</param>
+        /// <param name="childIndex">The child shape index.</param>
+        /// <returns>True if the ray-cast hits the shape</returns>
+        public override bool RayCast(out RayCastOutput output, ref RayCastInput input, ref Transform transform,
+                                     int childIndex)
         {
             // Collision Detection in Interactive 3D Environments by Gino van den Bergen
             // From Section 3.1.2
@@ -104,7 +107,7 @@ namespace FarseerPhysics.Collision.Shapes
 
             output = new RayCastOutput();
 
-            Vector2 position = transform.p + MathUtils.Mul(transform.q, Position);
+            Vector2 position = transform.Position + MathUtils.Multiply(ref transform.R, Position);
             Vector2 s = input.Point1 - position;
             float b = Vector2.Dot(s, s) - Radius * Radius;
 
@@ -121,31 +124,40 @@ namespace FarseerPhysics.Collision.Shapes
             }
 
             // Find the point of intersection of the line with the circle.
-            float a = -(c + (float)Math.Sqrt(sigma)); //TODO: Move to mathhelper?
+            float a = -(c + (float)Math.Sqrt(sigma));
 
             // Is the intersection point on the segment?
             if (0.0f <= a && a <= input.MaxFraction * rr)
             {
                 a /= rr;
                 output.Fraction = a;
-
-                //TODO: Check results here
-                output.Normal = s + a * r;
-                output.Normal.Normalize();
+                Vector2 norm = (s + a * r);
+                norm.Normalize();
+                output.Normal = norm;
                 return true;
             }
 
             return false;
         }
 
+        /// <summary>
+        /// Given a transform, compute the associated axis aligned bounding box for a child shape.
+        /// </summary>
+        /// <param name="aabb">The aabb results.</param>
+        /// <param name="transform">The world transform of the shape.</param>
+        /// <param name="childIndex">The child shape index.</param>
         public override void ComputeAABB(out AABB aabb, ref Transform transform, int childIndex)
         {
-            Vector2 p = transform.p + MathUtils.Mul(transform.q, Position);
+            Vector2 p = transform.Position + MathUtils.Multiply(ref transform.R, Position);
             aabb.LowerBound = new Vector2(p.X - Radius, p.Y - Radius);
             aabb.UpperBound = new Vector2(p.X + Radius, p.Y + Radius);
         }
 
-        protected override sealed void ComputeProperties()
+        /// <summary>
+        /// Compute the mass properties of this shape using its dimensions and density.
+        /// The inertia tensor is computed about the local origin, not the centroid.
+        /// </summary>
+        public override sealed void ComputeProperties()
         {
             float area = Settings.Pi * Radius * Radius;
             MassData.Area = area;
@@ -156,21 +168,17 @@ namespace FarseerPhysics.Collision.Shapes
             MassData.Inertia = MassData.Mass * (0.5f * Radius * Radius + Vector2.Dot(Position, Position));
         }
 
-        /// <summary>
-        /// Compare the circle to another circle
-        /// </summary>
-        /// <param name="shape">The other circle</param>
-        /// <returns>True if the two circles are the same size and have the same position</returns>
         public bool CompareTo(CircleShape shape)
         {
-            return (Radius == shape.Radius && Position == shape.Position);
+            return (Radius == shape.Radius &&
+                    Position == shape.Position);
         }
 
-        public override float ComputeSubmergedArea(ref Vector2 normal, float offset, ref Transform xf, out Vector2 sc)
+        public override float ComputeSubmergedArea(Vector2 normal, float offset, Transform xf, out Vector2 sc)
         {
             sc = Vector2.Zero;
 
-            Vector2 p = MathUtils.Mul(ref xf, Position);
+            Vector2 p = MathUtils.Multiply(ref xf, Position);
             float l = -(Vector2.Dot(normal, p) - offset);
             if (l < -Radius + Settings.Epsilon)
             {

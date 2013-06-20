@@ -1,16 +1,21 @@
-﻿#if XNA
-
-using System.Collections.Generic;
-using FarseerPhysics.Collision;
-using FarseerPhysics.Common.Decomposition;
-using FarseerPhysics.Common.PolygonManipulation;
-using FarseerPhysics.Dynamics;
-using FarseerPhysics.Factories;
+﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using FarseerPhysics.Dynamics;
+using FarseerPhysics.Collision;
+using FarseerPhysics.Factories;
 
-namespace FarseerPhysics.Common.TextureTools
+namespace FarseerPhysics.Common
 {
+    public enum Decomposer
+    {
+        Bayazit,
+        CDT,
+        Earclip,
+        Flipcode,
+        Seidel,
+    }
+
     /// <summary>
     /// Return true if the specified color is inside the terrain.
     /// </summary>
@@ -66,7 +71,7 @@ namespace FarseerPhysics.Common.TextureTools
         /// Decomposer to use when regenerating terrain. Can be changed on the fly without consequence.
         /// Note: Some decomposerers are unstable.
         /// </summary>
-        public TriangulationAlgorithm Decomposer;
+        public Decomposer Decomposer;
 
         /// <summary>
         /// Point cloud defining the terrain.
@@ -327,9 +332,29 @@ namespace FarseerPhysics.Common.TextureTools
                 item.Scale(ref scale);
                 item.Translate(ref _topLeft);
                 item.ForceCounterClockWise();
-                Vertices p = SimplifyTools.CollinearSimplify(item);
+                Vertices p = FarseerPhysics.Common.PolygonManipulation.SimplifyTools.CollinearSimplify(item);
+                List<Vertices> decompPolys = new List<Vertices>();
 
-                List<Vertices> decompPolys = Triangulate.ConvexPartition(p, Decomposer);
+                switch (Decomposer)
+                {
+                    case Decomposer.Bayazit:
+                        decompPolys = Decomposition.BayazitDecomposer.ConvexPartition(p);
+                        break;
+                    case Decomposer.CDT:
+                        decompPolys = Decomposition.CDTDecomposer.ConvexPartition(p);
+                        break;
+                    case Decomposer.Earclip:
+                        decompPolys = Decomposition.EarclipDecomposer.ConvexPartition(p);
+                        break;
+                    case Decomposer.Flipcode:
+                        decompPolys = Decomposition.FlipcodeDecomposer.ConvexPartition(p);
+                        break;
+                    case Decomposer.Seidel:
+                        decompPolys = Decomposition.SeidelDecomposer.ConvexPartition(p, 0.001f);
+                        break;
+                    default:
+                        break;
+                }
 
                 foreach (Vertices poly in decompPolys)
                 {
@@ -340,4 +365,3 @@ namespace FarseerPhysics.Common.TextureTools
         }
     }
 }
-#endif

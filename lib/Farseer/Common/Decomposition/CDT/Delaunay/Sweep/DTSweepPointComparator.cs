@@ -31,9 +31,9 @@
 
 using System.Collections.Generic;
 
-namespace FarseerPhysics.Common.Decomposition.CDT.Delaunay.Sweep
+namespace Poly2Tri.Triangulation.Delaunay.Sweep
 {
-    internal class DTSweepPointComparator : IComparer<TriangulationPoint>
+    public class DTSweepPointComparator : IComparer<TriangulationPoint>
     {
         #region IComparer<TriangulationPoint> Members
 
