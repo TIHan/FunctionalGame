@@ -32,15 +32,14 @@ let main args =
             let tickTime = time.ElapsedMilliseconds
             
             match tickTime >= game.NextTickTime with
-            | true -> // Game Update                  
-                let updatedState = game.State |> Game.Tick tickTime
-                ({ game with State = updatedState; LastTickTime = tickTime; NextTickTime = tickTime + int64 rate; EventQueue = game.EventQueue @ updatedState.EventQueue }, true)
+            | false -> // Game Client Update
+                let lerpAmount = float32 (tickTime - game.LastTickTime) / float32 (game.NextTickTime - game.LastTickTime)
+                let updatedClientState = game.ClientState |> ClientGame.ProcessEvents game.EventQueue |> ClientGame.Tick lerpAmount
+                ({ game with ClientState = updatedClientState; EventQueue = [] }, true)
                 
-            | _ -> // Game Client Update
-            let lerpAmount = float32 (tickTime - game.LastTickTime) / float32 (game.NextTickTime - game.LastTickTime)
-            let updatedClientState = game.ClientState |> ClientGame.ProcessEvents game.EventQueue |> ClientGame.Tick lerpAmount
-            //Thread.Sleep 16
-            ({ game with ClientState = updatedClientState; EventQueue = [] }, true)
+            | _ -> // Game Update                  
+            let updatedState = game.State |> Game.Tick tickTime
+            ({ game with State = updatedState; LastTickTime = tickTime; NextTickTime = tickTime + int64 rate; EventQueue = game.EventQueue @ updatedState.EventQueue }, true)
     )
     0
 

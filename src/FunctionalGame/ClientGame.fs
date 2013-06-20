@@ -32,7 +32,6 @@ type State = {
     Entities: Map<int, Entity>;
     WindowHandle: int;
     Time: Stopwatch;
-    LerpAmount: float32;
 }
 
 /// <summary>
@@ -122,7 +121,7 @@ let rec ProcessEvents (eventQueue: Event list) state =
 let Init () =
     let windowHandle = Window.Create 1280 720 "Functional Game" 
     Renderer.Init ()
-    { Entities = Map.empty; WindowHandle = windowHandle; Time = Stopwatch.StartNew (); LerpAmount = 0.f }
+    { Entities = Map.empty; WindowHandle = windowHandle; Time = Stopwatch.StartNew () }
     
 /// <summary>
 /// Tick
@@ -130,11 +129,11 @@ let Init () =
 let Tick lerpAmount (state: State) =
     Renderer.Clear ()
     Map.iter (fun id entity ->     
-        RenderEntity entity state.LerpAmount
+        RenderEntity entity lerpAmount
     ) state.Entities
     
     Window.Refresh state.WindowHandle
-    { state with LerpAmount = lerpAmount }
+    state
     
 /// <summary>
 /// ShouldClose
