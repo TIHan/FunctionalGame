@@ -9,31 +9,31 @@ open Microsoft.FSharp.NativeInterop
 // http://www.glfw.org/docs/3.0/quick.html
 
 module internal NativeGLFW =
-    [<DllImport ("glfw3.dll")>]
+    [<DllImport ("glfw3.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int glfwInit ()
     
-    [<DllImport ("glfw3.dll")>]
+    [<DllImport ("glfw3.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern void glfwTerminate ()
     
-    [<DllImport ("glfw3.dll")>]
+    [<DllImport ("glfw3.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern nativeint glfwCreateWindow (int width, int height, string title, nativeint monitor, nativeint share)
     
-    [<DllImport ("glfw3.dll")>]
+    [<DllImport ("glfw3.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern nativeint glfwGetPrimaryMonitor ()
     
-    [<DllImport ("glfw3.dll")>]
+    [<DllImport ("glfw3.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern void glfwMakeContextCurrent (nativeint window)
     
-    [<DllImport ("glfw3.dll")>]
+    [<DllImport ("glfw3.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int glfwWindowShouldClose (nativeint window)
     
-    [<DllImport ("glfw3.dll")>]
+    [<DllImport ("glfw3.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern void glfwSwapBuffers (nativeint window)
     
-    [<DllImport ("glfw3.dll")>]
+    [<DllImport ("glfw3.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern void glfwSwapInterval (int interval)
     
-    [<DllImport ("glfw3.dll")>]
+    [<DllImport ("glfw3.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern void glfwPollEvents ()
     
 module GLFW =

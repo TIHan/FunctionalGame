@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -42,31 +42,21 @@
     <PlatformTarget>x86</PlatformTarget>
     <Tailcalls>true</Tailcalls>
   </PropertyGroup>
+  <PropertyGroup>
+    <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition="Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets'))" />
+  <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="(!Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')) And (!Exists('$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets')) And (Exists('$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets'))" />
   <ItemGroup>
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="FSharp.Core">
-      <HintPath>..\..\lib\FSharp.Core.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Program.fs" />
     <Compile Include="Tools.fs" />
-    <Compile Include="ClientGame.fs" />
+    <Compile Include="SharedGame.fs" />
     <Compile Include="Renderer.fs" />
     <Compile Include="Window.fs" />
-    <Compile Include="SharedGame.fs" />
-    <Compile Include="Game.fs" />
+    <Compile Include="ClientGame.fs" />
     <Compile Include="Physics.fs" />
-  </ItemGroup>
-  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" />
-  <ItemGroup>
-    <Folder Include="Content\" />
-  </ItemGroup>
-  <ItemGroup>
+    <Compile Include="Game.fs" />
+    <Compile Include="Program.fs" />
     <None Include="Content\Textures\Block\BLOCK.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -225,6 +215,14 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="FSharp.Core">
+      <HintPath>..\..\lib\FSharp.Core.dll</HintPath>
+    </Reference>
     <ProjectReference Include="..\..\lib\Farseer\Farseer Physics.csproj">
       <Project>{A4610E4C-DD34-428B-BABB-779CA0B5993A}</Project>
       <Name>Farseer Physics</Name>
