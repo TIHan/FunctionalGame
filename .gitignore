@@ -114,3 +114,6 @@ MassTransit.log*
 *.userprefs
 .sln~
 
+# OSX
+.DS_Store
+

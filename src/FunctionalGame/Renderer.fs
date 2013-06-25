@@ -29,7 +29,7 @@ let LoadTexture filename =
         use block = new Bitmap (filename)
         let data = 
             block.LockBits (
-                new Rectangle (0, 0, block.Width, block.Height),
+                new System.Drawing.Rectangle (0, 0, block.Width, block.Height),
                 Imaging.ImageLockMode.ReadOnly,
                 Imaging.PixelFormat.Format32bppArgb
             )
