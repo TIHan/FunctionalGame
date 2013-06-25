@@ -9,6 +9,7 @@ let Create width height title =
 
     let handle = GLFW.CreateWindow 1280 720 "Functional Game" (0) // GLFW.GetPrimaryMonitor ()
     GLFW.MakeContextCurrent handle
+    GLFW.SwapInterval (1)
     handle
     
 
