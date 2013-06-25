@@ -50,7 +50,7 @@ let main args =
             let nextTickTime = tickTime + int64 rate
             let elapsedTime = time.ElapsedMilliseconds - tickTime
             let eventQueue = game.EventQueue @ updatedState.EventQueue
-            let renderTickTime = tickTime + int64 clientRate
+            let renderTickTime = elapsedTime + int64 clientRate
             printfn "%i" elapsedTime
             ({ game with State = updatedState; LastTickTime = tickTime; NextTickTime = nextTickTime;
                         ElapsedTickTime = elapsedTime; NextRenderTickTime = renderTickTime; EventQueue = eventQueue }, true)
