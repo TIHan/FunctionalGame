@@ -6,6 +6,7 @@ open System.Drawing
 open System.Diagnostics
 open System.Collections.Concurrent
 open FunctionalGame.SharedGame
+open FunctionalGame.Renderer
 open FarseerPhysics
 
 /// <summary>
@@ -29,6 +30,7 @@ type Entity = {
 /// State
 /// </summary>   
 type State = {
+    Rate: float32;
     Entities: Map<int, Entity>;
     WindowHandle: int;
     Time: Stopwatch;
@@ -42,28 +44,30 @@ let private Lerp value1 value2 amount =
     | x when x <= 0.f -> value1
     | x when x >= 1.f -> value2
     | _ -> value1 + (value2 - value1) * amount
+    
+let internal Renderer : IRenderer = new GL21Renderer () :> IRenderer
 
 /// <summary>
 /// RenderEntity
 /// </summary>   
-let private RenderEntity (entity: Entity) lerpAmount =
+let private RenderEntity (renderer: IRenderer) (entity: Entity) lerpAmount =
     let x = Lerp entity.LastX entity.X lerpAmount
     let y = Lerp entity.LastY entity.Y lerpAmount
     let rotation = Lerp entity.LastRotation entity.Rotation lerpAmount
-    Renderer.RenderTexture entity.Texture x y rotation
+    renderer.RenderTexture (entity.Texture, x, y, rotation)
 
 /// <summary>
 /// GetTextureByEntityType
 /// </summary>       
-let private GetTextureByEntityType (entityType: EntityType) =
+let private GetTextureByEntityType (renderer: IRenderer) (entityType: EntityType) =
     match entityType with
-    | _ -> Renderer.LoadTexture "Content/Textures/Block/BLOCK.png"
+    | _ -> renderer.LoadTexture "Content/Textures/Block/BLOCK.png"
     
 /// <summary>
 /// EntitySpawned
 /// </summary>
 let private EntitySpawned (state: State) id entityType width height x y rotation =
-    let texture = GetTextureByEntityType entityType
+    let texture = GetTextureByEntityType Renderer entityType
     let entity = {
         Id = id;
         Type = entityType;
@@ -120,8 +124,14 @@ let rec ProcessEvents (eventQueue: Event list) state =
 /// </summary>       
 let Init () =
     let windowHandle = Window.Create 1280 720 "Functional Game" 
+    
     Renderer.Init ()
-    { Entities = Map.empty; WindowHandle = windowHandle; Time = Stopwatch.StartNew () }
+    {
+        Rate = 1.f / 60.f * 1000.f;
+        Entities = Map.empty;
+        WindowHandle = windowHandle;
+        Time = Stopwatch.StartNew ();
+    }
     
 /// <summary>
 /// Tick
@@ -129,7 +139,7 @@ let Init () =
 let Tick lerpAmount (state: State) =
     Renderer.Clear ()
     Map.iter (fun id entity ->     
-        RenderEntity entity lerpAmount
+        RenderEntity Renderer entity lerpAmount
     ) state.Entities
     
     Window.Refresh state.WindowHandle

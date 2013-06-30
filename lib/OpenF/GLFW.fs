@@ -8,12 +8,26 @@ open Microsoft.FSharp.NativeInterop
 
 // http://www.glfw.org/docs/3.0/quick.html
 
+// TODO:
+type WindowHintTarget =
+    | ContextVersionMajor = 0x00022002
+    | ContextVersionMinor = 0x00022003
+    | OpenGLForwardCompatible = 0x00022006
+    | OpenGLProfile = 0x00022008
+    
+
+module WindowHintValue =
+    let OpenGLCoreProfile = int 0x00032001
+
 module internal NativeGLFW =
     [<DllImport ("glfw3.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern int glfwInit ()
     
     [<DllImport ("glfw3.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern void glfwTerminate ()
+
+    [<DllImport ("glfw3.dll", CallingConvention = CallingConvention.Cdecl)>]
+    extern nativeint glfwWindowHint (int target, int hint)    
     
     [<DllImport ("glfw3.dll", CallingConvention = CallingConvention.Cdecl)>]
     extern nativeint glfwCreateWindow (int width, int height, string title, nativeint monitor, nativeint share)
@@ -37,6 +51,7 @@ module internal NativeGLFW =
     extern void glfwPollEvents ()
     
 module GLFW =
+
     let Init () =
         match NativeGLFW.glfwInit () with
         | 0 -> raise (Exception "Unable to initialize GLFW.")
@@ -44,6 +59,9 @@ module GLFW =
         
     let Terminate () =
         NativeGLFW.glfwTerminate ()
+        
+    let WindowHint (target: WindowHintTarget) hint =
+        int (NativeGLFW.glfwWindowHint (int target, hint))
         
     // FIXME
     let CreateWindow width height title monitorHandle =

@@ -15,6 +15,7 @@ type Entity = { Id: int; Type: EntityType; Physics: Physics.PhysicsObject }
 /// State
 /// </summary>   
 type State = {
+    Rate: float32;
     Entities: Map<int, Entity>;
     Counter: int;
     EntitySpawnTime: int64;
@@ -48,7 +49,7 @@ let private GameLogic tickTime (state: State) =
 /// TickPhysics
 /// </summary>         
 let private TickPhysics (state: State) =
-    state.PhysicsEngine.Tick (1.f / 20.f)
+    state.PhysicsEngine.Tick (state.Rate / 1000.f)
     
     let entities = state.Entities |> Map.map (fun id entity ->
         UpdateEntity state entity
@@ -66,7 +67,14 @@ let private TickPhysics (state: State) =
 /// Init
 /// </summary>       
 let Init () =
-    { Entities = Map.empty; Counter = 0; EntitySpawnTime = int64 0; PhysicsEngine = new Physics.PhysicsEngine (0.f, 9.82f); EventQueue = [] }
+    {
+        Rate = 1.f / 20.f * 1000.f;
+        Entities = Map.empty; 
+        Counter = 0;
+        EntitySpawnTime = int64 0;
+        PhysicsEngine = new Physics.PhysicsEngine (0.f, 9.82f);
+        EventQueue = [] 
+    }
 
     
 /// <summary>

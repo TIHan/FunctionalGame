@@ -6,6 +6,21 @@ open OpenF.GLFW
 
 let Create width height title =
     GLFW.Init ()
+    
+#if OPENGL_2_1
+    GLFW.WindowHint WindowHintTarget.ContextVersionMajor 2 |> ignore
+    GLFW.WindowHint WindowHintTarget.ContextVersionMinor 1 |> ignore
+#else   
+    #if OPENGL_3_3
+    GLFW.WindowHint WindowHintTarget.ContextVersionMajor 3 |> ignore
+    GLFW.WindowHint WindowHintTarget.ContextVersionMinor 2 |> ignore
+    GLFW.WindowHint WindowHintTarget.OpenGLForwardCompatible 1 |> ignore
+    GLFW.WindowHint WindowHintTarget.OpenGLProfile WindowHintValue.OpenGLCoreProfile |> ignore
+    #else
+    raise (Exception "GL Context not specified.")
+    #endif
+#endif
+    
 
     let handle = GLFW.CreateWindow 1280 720 "Functional Game" (0) // GLFW.GetPrimaryMonitor ()
     GLFW.MakeContextCurrent handle
