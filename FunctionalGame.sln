@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{1BC8C280-CE77-4CA2-B2FD-6105C18794D1}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FunctionalGame", "src\FunctionalGame\FunctionalGame.fsproj", "{59433434-F66F-43D3-8401-140A0CBC0BE5}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farseer Physics", "lib\Farseer\Farseer Physics.csproj", "{A4610E4C-DD34-428B-BABB-779CA0B5993A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FarseerExtensions", "lib\FarseerExtensions\FarseerExtensions.csproj", "{78E4EBAF-5883-4F36-ABC4-5676618517FB}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "OpenF", "lib\OpenF\OpenF.fsproj", "{267A9D74-9B20-497C-8753-A8DECAAE0DEA}"
+Project("{4925A630-B079-445d-BCD4-3A9C94FE9307}") = "OpenF", "lib\OpenF\OpenF.fsproj", "{267A9D74-9B20-497C-8753-A8DECAAE0DEA}"
+EndProject
+Project("{4925A630-B079-445d-BCD4-3A9C94FE9307}") = "FunctionalGame", "src\FunctionalGame\FunctionalGame.fsproj", "{59433434-F66F-43D3-8401-140A0CBC0BE5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,25 +17,22 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{59433434-F66F-43D3-8401-140A0CBC0BE5}.Debug|x86.ActiveCfg = Debug|x86
-		{59433434-F66F-43D3-8401-140A0CBC0BE5}.Debug|x86.Build.0 = Debug|x86
-		{59433434-F66F-43D3-8401-140A0CBC0BE5}.Release|x86.ActiveCfg = Release|x86
-		{59433434-F66F-43D3-8401-140A0CBC0BE5}.Release|x86.Build.0 = Release|x86
-		{A4610E4C-DD34-428B-BABB-779CA0B5993A}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{A4610E4C-DD34-428B-BABB-779CA0B5993A}.Debug|x86.Build.0 = Debug|Any CPU
-		{A4610E4C-DD34-428B-BABB-779CA0B5993A}.Release|x86.ActiveCfg = Release|Any CPU
-		{A4610E4C-DD34-428B-BABB-779CA0B5993A}.Release|x86.Build.0 = Release|Any CPU
-		{78E4EBAF-5883-4F36-ABC4-5676618517FB}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{78E4EBAF-5883-4F36-ABC4-5676618517FB}.Debug|x86.Build.0 = Debug|Any CPU
-		{78E4EBAF-5883-4F36-ABC4-5676618517FB}.Release|x86.ActiveCfg = Release|Any CPU
-		{78E4EBAF-5883-4F36-ABC4-5676618517FB}.Release|x86.Build.0 = Release|Any CPU
 		{267A9D74-9B20-497C-8753-A8DECAAE0DEA}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{267A9D74-9B20-497C-8753-A8DECAAE0DEA}.Debug|x86.Build.0 = Debug|Any CPU
 		{267A9D74-9B20-497C-8753-A8DECAAE0DEA}.Release|x86.ActiveCfg = Release|Any CPU
 		{267A9D74-9B20-497C-8753-A8DECAAE0DEA}.Release|x86.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
+		{59433434-F66F-43D3-8401-140A0CBC0BE5}.Debug|x86.ActiveCfg = Debug|x86
+		{59433434-F66F-43D3-8401-140A0CBC0BE5}.Debug|x86.Build.0 = Debug|x86
+		{59433434-F66F-43D3-8401-140A0CBC0BE5}.Release|x86.ActiveCfg = Release|x86
+		{59433434-F66F-43D3-8401-140A0CBC0BE5}.Release|x86.Build.0 = Release|x86
+		{78E4EBAF-5883-4F36-ABC4-5676618517FB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{78E4EBAF-5883-4F36-ABC4-5676618517FB}.Debug|x86.Build.0 = Debug|Any CPU
+		{78E4EBAF-5883-4F36-ABC4-5676618517FB}.Release|x86.ActiveCfg = Release|Any CPU
+		{78E4EBAF-5883-4F36-ABC4-5676618517FB}.Release|x86.Build.0 = Release|Any CPU
+		{A4610E4C-DD34-428B-BABB-779CA0B5993A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A4610E4C-DD34-428B-BABB-779CA0B5993A}.Debug|x86.Build.0 = Debug|Any CPU
+		{A4610E4C-DD34-428B-BABB-779CA0B5993A}.Release|x86.ActiveCfg = Release|Any CPU
+		{A4610E4C-DD34-428B-BABB-779CA0B5993A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A4610E4C-DD34-428B-BABB-779CA0B5993A} = {1BC8C280-CE77-4CA2-B2FD-6105C18794D1}
@@ -44,5 +41,8 @@ Global
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = src\FunctionalGame\FunctionalGame.fsproj
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

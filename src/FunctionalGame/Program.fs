@@ -5,16 +5,17 @@ open System.Threading
 open System.Diagnostics
 open FunctionalGame.SharedGame
     
+
 type Game = {
     State: Game.State;
     ClientState: ClientGame.State;
     LastTickTime: int64;
     NextTickTime: int64;
     NextRenderTickTime: int64;
-    EventQueue: Event list
+    EventQueue: Event list;
 }
 
-let inline Process tickTime (game: Game) =
+let Process tickTime (game: Game) =
     let state = game.State |> Game.Tick tickTime
       
     ({ 
@@ -27,8 +28,8 @@ let inline Process tickTime (game: Game) =
     }, true)
 
 
-let inline ProcessClient tickTime (game: Game) =
-    match game.NextRenderTickTime >= tickTime with
+let ProcessClient tickTime (game: Game) =
+    match tickTime >= game.NextRenderTickTime with
     | false -> (game, true)
     | _ ->
     let state = 
