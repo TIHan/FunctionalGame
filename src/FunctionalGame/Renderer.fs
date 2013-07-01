@@ -95,3 +95,66 @@ type GL21Renderer () =
             GL.Vertex2Float 0.f height
 
             GL.End ()
+            
+
+type GL33Renderer () =
+    interface IRenderer with 
+    
+        member this.Init () =
+            let vaid = GL.GenerateVertexArray ()
+            
+            GL.BindVertexArray vaid
+            //GL.Enable EnableCap.Texture2D
+            //GL.Disable DisableCap.DepthTest
+            GL.ClearColor 0.f 1.f 0.f 1.f
+            
+            //GL.MatrixMode MatrixMode.Projection
+            //GL.LoadIdentity ()
+//            GL.Orthographic 0. (double 1280) (double 720) 0. 0. 1.
+//            GL.MatrixMode MatrixMode.ModelView
+        
+           
+        member this.Clear () =
+            GL.Clear ClearMask.ColorBufferBit   
+                
+
+        member this.LoadTexture filename =
+            match File.Exists filename with
+            | false -> raise (Exception (String.Format ("Unable to find texture, {0}.", filename)))
+            | _ ->
+                use block = new Bitmap (filename)
+                let data = 
+                    block.LockBits (
+                        new System.Drawing.Rectangle (0, 0, block.Width, block.Height),
+                        Imaging.ImageLockMode.ReadOnly,
+                        Imaging.PixelFormat.Format32bppArgb
+                    )
+                
+                let mutable tid = GL.GenerateTexture ()
+                GL.BindTexture BindTextureTarget.Texture2D tid
+
+                GL.TextureImage2D
+                    TextureImage2DTarget.Texture2D
+                    0
+                    BaseInternalFormat.Rgba
+                    data.Width
+                    data.Height
+                    0
+                    PixelFormat.Bgra
+                    PixelType.UnsignedByte
+                    data.Scan0
+                
+                block.UnlockBits (data)
+                GL.TextureParameterInt TextureParameterTarget.Texture2D TextureParameterName.TextureMinFilter (int TextureMinFilter.Linear)
+                GL.TextureParameterInt TextureParameterTarget.Texture2D TextureParameterName.TextureMagFilter (int TextureMagFilter.Linear)
+                { Id = int tid; Width = data.Width; Height = data.Height }
+            
+
+        member this.RenderTexture (texture: Texture, x, y, rotation) =
+            let width = float32 texture.Width
+            let height = float32 texture.Height
+            let tid = uint32 texture.Id
+            
+            let originX = (width / 2.f)
+            let originY = (height / 2.f)
+            ()

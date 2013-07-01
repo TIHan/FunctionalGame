@@ -45,7 +45,12 @@ let private Lerp value1 value2 amount =
     | x when x >= 1.f -> value2
     | _ -> value1 + (value2 - value1) * amount
     
-let internal Renderer : IRenderer = new GL21Renderer () :> IRenderer
+let internal Renderer : IRenderer = 
+#if OPENGL_2_1
+    new GL21Renderer () :> IRenderer
+#else
+    new GL33Renderer () :> IRenderer
+#endif
 
 /// <summary>
 /// RenderEntity

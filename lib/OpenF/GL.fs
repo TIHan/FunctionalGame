@@ -8,6 +8,12 @@ open Microsoft.FSharp.NativeInterop
 
 module internal NativeGL =
     [<DllImport ("opengl32.dll")>]
+    extern void glGenVertexArrays (int n, uint32 *arrays)
+    
+    [<DllImport ("opengl32.dll")>]
+    extern void glBindVertexArray (uint32 array)
+
+    [<DllImport ("opengl32.dll")>]
     extern void glGenTextures (int n, uint32 *textures)
     
     [<DllImport ("opengl32.dll")>]
@@ -93,6 +99,34 @@ module GL =
         | Error.StackOverflow -> raise (Exception "Stack overflow.")
         | _ -> raise (Exception "Invalid GL error.")
 #endif
+        
+    /// <summary>
+    /// glGenVertexArrays
+    /// </summary>
+    let GenerateVertexArrays amount =
+        let mutable nativeArrays = NativePtr.stackalloc<uint32> amount
+        let arrays : uint32[] = Array.zeroCreate amount
+        
+        NativeGL.glGenVertexArrays (amount, nativeArrays);
+        CheckError ()
+        
+        let source = NativePtr.toNativeInt nativeArrays
+        let destination = arrays :> obj :?> int[]
+        Marshal.Copy (source, destination, 0, amount)
+        arrays
+        
+    /// <summary>
+    /// glGenVertexArrays
+    /// </summary>
+    let GenerateVertexArray () =
+        (GenerateVertexArrays 1).[0]
+        
+    /// <summary>
+    /// glBindVertexArray
+    /// </summary>  
+    let BindVertexArray array =
+        NativeGL.glBindVertexArray array
+        CheckError ()
         
     /// <summary>
     /// glGenTextures
