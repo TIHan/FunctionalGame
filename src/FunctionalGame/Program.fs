@@ -28,6 +28,9 @@ let inline Process tickTime (game: Game) =
 
 
 let inline ProcessClient tickTime (game: Game) =
+    match game.NextRenderTickTime >= tickTime with
+    | false -> (game, true)
+    | _ ->
     let state = 
         game.ClientState 
         |> ClientGame.ProcessEvents game.EventQueue 
