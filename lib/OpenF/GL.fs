@@ -105,7 +105,7 @@ module internal NativeGL =
 
 
 module GL = 
-    let inline private CheckError () =
+    let private CheckError () =
 #if DISABLE_GL_ERROR_CHECKING
         ()
 #else
@@ -210,10 +210,11 @@ module GL =
     /// glBufferData
     /// </summary>  
     let BufferData (target: BufferDataTarget) (data: float32[]) (usage: BufferDataUsage) =
-        let size = data.Length
-        let mutable nativeData : nativeint = NativePtr.toNativeInt (NativePtr.stackalloc<int> size)
+        let length = data.Length
+        let size = length * sizeof<float32>
+        let mutable nativeData = NativePtr.toNativeInt (NativePtr.stackalloc<float32> length)
         
-        Marshal.Copy (data, 0, nativeData, size)
+        Marshal.Copy (data, 0, nativeData, length)
         NativeGL.glBufferData (uint32 target, size, nativeData, uint32 usage)
         CheckError ()
         

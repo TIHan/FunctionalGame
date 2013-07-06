@@ -98,10 +98,12 @@ type GL21Renderer () =
             
 
 type GL33Renderer () =
-    interface IRenderer with 
     
+    let vaid = GL.GenerateVertexArray ()
+    
+    interface IRenderer with 
+   
         member this.Init () =
-            let vaid = GL.GenerateVertexArray ()
             
             GL.BindVertexArray vaid
             //GL.Enable EnableCap.Texture2D
@@ -147,20 +149,17 @@ type GL33Renderer () =
                 block.UnlockBits (data)
                 GL.TextureParameterInt TextureParameterTarget.Texture2D TextureParameterName.TextureMinFilter (int TextureMinFilter.Linear)
                 GL.TextureParameterInt TextureParameterTarget.Texture2D TextureParameterName.TextureMagFilter (int TextureMagFilter.Linear)
-
-                let buffer = GL.GenerateBuffer ()
-                
-                GL.BindBuffer BindBufferTarget.ArrayBuffer buffer
                 
                 let vertexData : float32[] = [|
-                    0.0f; 0.0f; 0.0f; 
-                    1.0f; 0.0f; 0.0f;
-                    1.0f; 1.0f; 0.0f;
-                    0.0f; 1.0f; 0.0f;
+                    -1.f; 0.f; 0.f; 
+                    1.f; 0.0f; 0.0f;
+                    0.f; 1.f; 0.f;
                 |]
+                let bid = GL.GenerateBuffer ()
+                GL.BindBuffer BindBufferTarget.ArrayBuffer bid
                 GL.BufferData BufferDataTarget.ArrayBuffer vertexData BufferDataUsage.StaticDraw
                 
-                { Id = int tid; Width = data.Width; Height = data.Height; BufferId = buffer }
+                { Id = int tid; Width = data.Width; Height = data.Height; BufferId = bid }
             
 
         member this.RenderTexture (texture: Texture, x, y, rotation) =
@@ -171,7 +170,6 @@ type GL33Renderer () =
             let originX = (width / 2.f)
             let originY = (height / 2.f)
             
-            //GL.BindTexture BindTextureTarget.Texture2D tid
             GL.EnableVertexAttributeArray (0u)
             GL.BindBuffer BindBufferTarget.ArrayBuffer texture.BufferId
             GL.VertexAttributePointer 0u 3 VertexAttributePointerType.Float false 0
