@@ -36,6 +36,26 @@ type TextureParameterTarget =
     | TextureRectangle = 0x84F5
     | TextureCubeMap = 0x8513
     
+// TODO
+type VertexAttributePointerType =
+    | Float = 0x1406
+    
+// TODO
+type BindBufferTarget =
+    | ArrayBuffer = 0x8892
+    
+// TODO
+type BufferDataTarget =
+    | ArrayBuffer = 0x8892
+    
+// TODO
+type BufferDataUsage =
+    | StaticDraw = 0x88E4
+    
+// TODO
+type DrawArraysMode =
+    | Triangles = 0x0004
+    
 type TextureMagFilter =
     | Nearest = 0x2600
     | Linear = 0x2601

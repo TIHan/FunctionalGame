@@ -8,10 +8,31 @@ open Microsoft.FSharp.NativeInterop
 
 module internal NativeGL =
     [<DllImport ("opengl32.dll")>]
+    extern void glVertexAttribPointer (uint32 index, int size, uint32 type_, bool normalized, int stride, void *pointer)
+    
+    [<DllImport ("opengl32.dll")>]
+    extern void glEnableVertexAttribArray (uint32 index)
+    
+    [<DllImport ("opengl32.dll")>]
+    extern void glDisableVertexAttribArray (uint32 index)
+    
+    [<DllImport ("opengl32.dll")>]
+    extern void glDrawArrays (uint32 mode, int first, int count)
+
+    [<DllImport ("opengl32.dll")>]
     extern void glGenVertexArrays (int n, uint32 *arrays)
     
     [<DllImport ("opengl32.dll")>]
     extern void glBindVertexArray (uint32 array)
+    
+    [<DllImport ("opengl32.dll")>]
+    extern void glGenBuffers (int n, uint32 *buffers)
+    
+    [<DllImport ("opengl32.dll")>]
+    extern void glBindBuffer (uint32 target, uint32 buffer)
+    
+    [<DllImport ("opengl32.dll")>]
+    extern void glBufferData (uint32 target, int size, void *data, uint32 usage)
 
     [<DllImport ("opengl32.dll")>]
     extern void glGenTextures (int n, uint32 *textures)
@@ -99,6 +120,35 @@ module GL =
         | Error.StackOverflow -> raise (Exception "Stack overflow.")
         | _ -> raise (Exception "Invalid GL error.")
 #endif
+
+    /// <summary>
+    /// glVertexAttribPointer
+    /// </summary>
+    // FIXME:
+    let VertexAttributePointer index size (type_: VertexAttributePointerType) normalized stride =
+        NativeGL.glVertexAttribPointer (index, size, uint32 type_, normalized, stride, nativeint 0)
+        CheckError ()
+       
+    /// <summary>
+    /// glEnableVertexAttribArray
+    /// </summary> 
+    let EnableVertexAttributeArray index =
+        NativeGL.glEnableVertexAttribArray index
+        CheckError ()
+        
+    /// <summary>
+    /// glDisableVertexAttribArray
+    /// </summary>
+    let DisableVertexAttributeArray index =
+        NativeGL.glDisableVertexAttribArray index
+        CheckError ()       
+        
+    /// <summary>
+    /// glDrawArrays
+    /// </summary>
+    let DrawArrays (mode: DrawArraysMode) size count =
+        NativeGL.glDrawArrays (uint32 mode, size, count)
+        CheckError ()
         
     /// <summary>
     /// glGenVertexArrays
@@ -126,6 +176,45 @@ module GL =
     /// </summary>  
     let BindVertexArray array =
         NativeGL.glBindVertexArray array
+        CheckError ()
+        
+    /// <summary>
+    /// glGenBuffers
+    /// </summary> 
+    let GenerateBuffers amount =
+        let mutable nativeBuffers = NativePtr.stackalloc<uint32> amount
+        let arrays : uint32[] = Array.zeroCreate amount
+        
+        NativeGL.glGenBuffers (amount, nativeBuffers);
+        CheckError ()
+        
+        let source = NativePtr.toNativeInt nativeBuffers
+        let destination = arrays :> obj :?> int[]
+        Marshal.Copy (source, destination, 0, amount)
+        arrays
+        
+    /// <summary>
+    /// glGenBuffers
+    /// </summary> 
+    let GenerateBuffer () =
+        (GenerateBuffers 1).[0]    
+
+    /// <summary>
+    /// glBindBuffer
+    /// </summary>     
+    let BindBuffer (target: BindBufferTarget) buffer =
+        NativeGL.glBindBuffer (uint32 target, buffer)
+        CheckError ()
+        
+    /// <summary>
+    /// glBufferData
+    /// </summary>  
+    let BufferData (target: BufferDataTarget) (data: float32[]) (usage: BufferDataUsage) =
+        let size = data.Length
+        let mutable nativeData : nativeint = NativePtr.toNativeInt (NativePtr.stackalloc<int> size)
+        
+        Marshal.Copy (data, 0, nativeData, size)
+        NativeGL.glBufferData (uint32 target, size, nativeData, uint32 usage)
         CheckError ()
         
     /// <summary>

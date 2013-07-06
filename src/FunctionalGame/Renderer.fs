@@ -5,7 +5,7 @@ open System.IO
 open System.Drawing
 open OpenF.GL
 
-type Texture = { Id: int; Width: int; Height: int; }
+type Texture = { Id: int; Width: int; Height: int; BufferId: uint32; }
 
 type IRenderer =
     abstract member Init : unit -> unit
@@ -60,7 +60,7 @@ type GL21Renderer () =
                 block.UnlockBits (data)
                 GL.TextureParameterInt TextureParameterTarget.Texture2D TextureParameterName.TextureMinFilter (int TextureMinFilter.Linear)
                 GL.TextureParameterInt TextureParameterTarget.Texture2D TextureParameterName.TextureMagFilter (int TextureMagFilter.Linear)
-                { Id = int tid; Width = data.Width; Height = data.Height }
+                { Id = int tid; Width = data.Width; Height = data.Height; BufferId = 0u }
             
 
         member this.RenderTexture (texture: Texture, x, y, rotation) =
@@ -147,7 +147,20 @@ type GL33Renderer () =
                 block.UnlockBits (data)
                 GL.TextureParameterInt TextureParameterTarget.Texture2D TextureParameterName.TextureMinFilter (int TextureMinFilter.Linear)
                 GL.TextureParameterInt TextureParameterTarget.Texture2D TextureParameterName.TextureMagFilter (int TextureMagFilter.Linear)
-                { Id = int tid; Width = data.Width; Height = data.Height }
+
+                let buffer = GL.GenerateBuffer ()
+                
+                GL.BindBuffer BindBufferTarget.ArrayBuffer buffer
+                
+                let vertexData : float32[] = [|
+                    0.0f; 0.0f; 0.0f; 
+                    1.0f; 0.0f; 0.0f;
+                    1.0f; 1.0f; 0.0f;
+                    0.0f; 1.0f; 0.0f;
+                |]
+                GL.BufferData BufferDataTarget.ArrayBuffer vertexData BufferDataUsage.StaticDraw
+                
+                { Id = int tid; Width = data.Width; Height = data.Height; BufferId = buffer }
             
 
         member this.RenderTexture (texture: Texture, x, y, rotation) =
@@ -157,4 +170,27 @@ type GL33Renderer () =
             
             let originX = (width / 2.f)
             let originY = (height / 2.f)
+            
+            //GL.BindTexture BindTextureTarget.Texture2D tid
+            GL.EnableVertexAttributeArray (0u)
+            GL.BindBuffer BindBufferTarget.ArrayBuffer texture.BufferId
+            GL.VertexAttributePointer 0u 3 VertexAttributePointerType.Float false 0
+            GL.DrawArrays DrawArraysMode.Triangles 0 3
+            GL.DisableVertexAttributeArray (0u)
+            
+            let fragmentShader = @"
+#version 330 
+
+in vec2 texCoord; 
+out vec4 outputColor; 
+
+uniform sampler2D gSampler; 
+
+void main() 
+{ 
+   outputColor = texture2D(gSampler, texCoord); 
+}
+            
+"
+            
             ()

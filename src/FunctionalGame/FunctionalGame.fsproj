@@ -27,7 +27,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;OPENGL_3_3</DefineConstants>
+    <DefineConstants>DEBUG;OPENGL_2_1</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <Externalconsole>true</Externalconsole>
     <PlatformTarget>x86</PlatformTarget>
@@ -43,7 +43,7 @@
     <Externalconsole>true</Externalconsole>
     <PlatformTarget>x86</PlatformTarget>
     <Tailcalls>true</Tailcalls>
-    <DefineConstants>OPENGL_2_1</DefineConstants>
+    <DefineConstants>OPENGL_3_3</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
