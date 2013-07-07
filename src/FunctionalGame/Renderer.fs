@@ -170,25 +170,57 @@ type GL33Renderer () =
             let originX = (width / 2.f)
             let originY = (height / 2.f)
             
+            let vertexSource = @" 
+#version 330
+ 
+in  vec3 in_Position;
+ 
+void main(void) 
+{
+    gl_Position = vec4(in_Position.x, in_Position.y, in_Position.z, 1.0);
+    return;
+}
+
+"
+
+            let fragmentSource = @"
+#version 330
+ 
+precision highp float;
+ 
+out vec4 fragColor;
+ 
+void main(void) 
+{
+    fragColor = vec4(1.0,1.0,1.0,1.0);
+    return;
+}
+
+"
+            
+            let vertexShader = GL.CreateShader ShaderType.Vertex
+            let fragmentShader = GL.CreateShader ShaderType.Fragment
+            
+            GL.ShaderSource vertexShader [| vertexSource |]
+            GL.ShaderSource fragmentShader [| fragmentSource |]
+            
+            GL.CompileShader vertexShader
+            GL.CompileShader fragmentShader
+            
+            let program = GL.CreateProgram ()
+            
+            GL.AttachShader program vertexShader
+            GL.AttachShader program fragmentShader
+            
+            GL.BindAttributeLocation program 0u "in_Position"
+            
+            GL.LinkProgram program
+            GL.UseProgram program
+            
             GL.EnableVertexAttributeArray (0u)
             GL.BindBuffer BindBufferTarget.ArrayBuffer texture.BufferId
             GL.VertexAttributePointer 0u 3 VertexAttributePointerType.Float false 0
             GL.DrawArrays DrawArraysMode.Triangles 0 3
             GL.DisableVertexAttributeArray (0u)
-            
-            let fragmentShader = @"
-#version 330 
-
-in vec2 texCoord; 
-out vec4 outputColor; 
-
-uniform sampler2D gSampler; 
-
-void main() 
-{ 
-   outputColor = texture2D(gSampler, texCoord); 
-}
-            
-"
             
             ()

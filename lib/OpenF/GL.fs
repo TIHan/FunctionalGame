@@ -1,107 +1,143 @@
 #nowarn "9" // Disable warning for native interopability
+#nowarn "51"
 
 namespace OpenF.GL
 
 open System
+open System.Text
 open System.Runtime.InteropServices
 open Microsoft.FSharp.NativeInterop
 
 module internal NativeGL =
-    [<DllImport ("opengl32.dll")>]
+
+    [<Literal>]
+    let libOpenGL = "opengl32.dll"
+
+    [<DllImport (libOpenGL)>]
     extern void glVertexAttribPointer (uint32 index, int size, uint32 type_, bool normalized, int stride, void *pointer)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glEnableVertexAttribArray (uint32 index)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glDisableVertexAttribArray (uint32 index)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glDrawArrays (uint32 mode, int first, int count)
 
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glGenVertexArrays (int n, uint32 *arrays)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glBindVertexArray (uint32 array)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glGenBuffers (int n, uint32 *buffers)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glBindBuffer (uint32 target, uint32 buffer)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glBufferData (uint32 target, int size, void *data, uint32 usage)
 
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glGenTextures (int n, uint32 *textures)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glBindTexture (uint32 target, uint32 texture)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glTexImage2D (uint32 target, int level, int internalFormat, int width, int height, int border, uint32 format, uint32 type_, void *data)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glTexParameterf (uint32 target, uint32 pname, float32 param)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glTexParameteri (uint32 target, uint32 pname, int param)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glMatrixMode (uint32 mode)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glPushMatrix ()
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glPopMatrix ()
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glLoadIdentity ()
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glTranslated (double x, double y, double z)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glTranslatef (float32 x, float32 y, float32 z)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glBegin (uint32 mode)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glEnd ()   
 
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glTexCoord2f (float32 s, float32 t)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glVertex2f (float32 x, float32 y)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glRotatef (float32 angle, float32 x, float32 y, float32 z)  
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glEnable (uint32 cap)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glDisable (uint32 cap)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glClearColor (float32 red, float32 green, float32 blue, float32 alpha)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glOrtho (double left, double right, double bottom, double top, double nearVal, double farVal)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glViewport (int x, int y, int width, int height)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern void glClear (uint32 mask)
     
-    [<DllImport ("opengl32.dll")>]
+    [<DllImport (libOpenGL)>]
     extern uint32 glGetError ()
+    
+    [<DllImport (libOpenGL)>]
+    extern uint32 glCreateShader (uint32 shaderType)
+    
+    [<DllImport (libOpenGL)>]
+    extern void glShaderSource (uint32 shader, int count, string[] string, int *length)
+    
+    [<DllImport (libOpenGL)>]
+    extern void glCompileShader (uint32 shader)
+    
+    [<DllImport (libOpenGL)>]
+    extern uint32 glCreateProgram ()
+    
+    [<DllImport (libOpenGL)>]
+    extern void glAttachShader (uint32 program, uint32 shader)
+    
+    [<DllImport (libOpenGL)>]
+    extern void glBindAttribLocation (uint32 program, uint32 index, string name)
+    
+    [<DllImport (libOpenGL)>]
+    extern void glLinkProgram (uint32 program)
+    
+    [<DllImport (libOpenGL)>]
+    extern void glUseProgram (uint32 program)
+    
+    [<DllImport (libOpenGL)>]
+    extern void glGetShaderiv (uint32 shader, uint32 pname, int *param)
+    
+    [<DllImport (libOpenGL)>]
+    extern void glGetShaderInfoLog (uint32 shader, int maxLength, int *length, sbyte *infoLog)
 
 
 module GL = 
@@ -381,4 +417,90 @@ module GL =
     let Clear (mask: ClearMask) =
         NativeGL.glClear (uint32 mask)
         CheckError ()
+        
+    /// <summary>
+    /// glCreateShader
+    /// </summary> 
+    let CreateShader (shaderType: ShaderType) =
+        let shader = NativeGL.glCreateShader (uint32 shaderType)
+        CheckError ()
+        shader
+        
+    /// <summary>
+    /// glShaderSource
+    /// </summary>        
+    let ShaderSource shader (sources: string[]) =
+        let length = sources.Length
 
+        NativeGL.glShaderSource (shader, length, sources, NativePtr.ofNativeInt<int> (nativeint 0))
+        CheckError ()
+        
+    /// <summary>
+    /// glCompileShader
+    /// </summary>   
+    let CompileShader shader =
+        NativeGL.glCompileShader shader
+        CheckError ()
+        
+    /// <summary>
+    /// glCreateProgram
+    /// </summary>
+    let CreateProgram () =
+        let program = NativeGL.glCreateProgram ()
+        CheckError ()
+        program
+        
+    /// <summary>
+    /// glAttachShader
+    /// </summary>
+    let AttachShader program shader =
+        NativeGL.glAttachShader (program, shader)
+        CheckError ()
+        
+    /// <summary>
+    /// glBindAttribLocation
+    /// </summary>   
+    let BindAttributeLocation program index name =
+        NativeGL.glBindAttribLocation (program, index, name)
+        CheckError ()
+
+    /// <summary>
+    /// glLinkProgram
+    /// </summary>
+    let LinkProgram program =
+        NativeGL.glLinkProgram program
+        CheckError ()
+        
+    /// <summary>
+    /// glUseProgram
+    /// </summary>
+    let UseProgram program =
+        NativeGL.glUseProgram program
+        CheckError ()
+        
+    /// <summary>
+    /// glGetShaderiv
+    /// </summary>
+    let GetShader shader (pname: ShaderParameter) =
+        let mutable value = 0
+        NativeGL.glGetShaderiv (shader, uint32 pname, &&value)
+        value
+        
+    /// <summary>
+    /// glGetShaderInfoLog
+    /// </summary>
+    let GetShaderInfoLog shader =
+        let length = GetShader shader ShaderParameter.InfoLogLength
+        let mutable nativeInfoLog = NativePtr.stackalloc<sbyte> length
+        let infoLog : byte[] = Array.zeroCreate length
+        
+        NativeGL.glGetShaderInfoLog (shader, length, NativePtr.ofNativeInt<int> (nativeint 0), nativeInfoLog)
+        CheckError ()
+        
+        let source = NativePtr.toNativeInt nativeInfoLog
+        Marshal.Copy (source, infoLog, 0, length)
+        
+        Encoding.Default.GetString (infoLog)
+        
+        
+        

@@ -37,6 +37,16 @@ type TextureParameterTarget =
     | TextureCubeMap = 0x8513
     
 // TODO
+type ShaderParameter =
+    | CompileStatus = 0x8B81
+    | InfoLogLength = 0x8B84
+ 
+// TODO
+type ShaderType =
+    | Fragment = 0x8B30
+    | Vertex = 0x8B31
+    
+// TODO
 type VertexAttributePointerType =
     | Float = 0x1406
     
