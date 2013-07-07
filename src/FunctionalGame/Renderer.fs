@@ -151,9 +151,10 @@ type GL33Renderer () =
                 GL.TextureParameterInt TextureParameterTarget.Texture2D TextureParameterName.TextureMagFilter (int TextureMagFilter.Linear)
                 
                 let vertexData : float32[] = [|
-                    -1.f; 0.f; 0.f; 
-                    1.f; 0.0f; 0.0f;
-                    0.f; 1.f; 0.f;
+                    0.f; 0.f; 0.f; 
+                    0.5f; 0.f; 0.f;
+                    0.f; 0.5f; 0.f;
+                    0.5f; 0.5f; 0.f;
                 |]
                 let bid = GL.GenerateBuffer ()
                 GL.BindBuffer BindBufferTarget.ArrayBuffer bid
@@ -175,7 +176,8 @@ type GL33Renderer () =
  
 in  vec3 in_Position;
  
-void main(void) 
+void
+main () 
 {
     gl_Position = vec4(in_Position.x, in_Position.y, in_Position.z, 1.0);
     return;
@@ -190,9 +192,10 @@ precision highp float;
  
 out vec4 fragColor;
  
-void main(void) 
+void
+main () 
 {
-    fragColor = vec4(1.0,1.0,1.0,1.0);
+    fragColor = vec4 (1.0,1.0,1.0,1.0);
     return;
 }
 
@@ -220,7 +223,7 @@ void main(void)
             GL.EnableVertexAttributeArray (0u)
             GL.BindBuffer BindBufferTarget.ArrayBuffer texture.BufferId
             GL.VertexAttributePointer 0u 3 VertexAttributePointerType.Float false 0
-            GL.DrawArrays DrawArraysMode.Triangles 0 3
+            GL.DrawArrays DrawArraysMode.TriangleStrip 0 4
             GL.DisableVertexAttributeArray (0u)
             
             ()

@@ -65,6 +65,7 @@ type BufferDataUsage =
 // TODO
 type DrawArraysMode =
     | Triangles = 0x0004
+    | TriangleStrip = 0x0005
     
 type TextureMagFilter =
     | Nearest = 0x2600
