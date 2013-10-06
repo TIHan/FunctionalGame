@@ -258,15 +258,11 @@ module GL =
     /// glGenTextures
     /// </summary>
     let GenerateTextures amount =
-        let mutable nativeTextures = NativePtr.stackalloc<uint32> amount
-        let textures : uint32[] = Array.zeroCreate amount
-        
-        NativeGL.glGenTextures (amount, nativeTextures);
+        let textures = Array.zeroCreate<uint32> amount
+
+        NativeGL.glGenTextures (amount, &&textures.[0]);
         CheckError ()
-        
-        let source = NativePtr.toNativeInt nativeTextures
-        let destination = textures :> obj :?> int[]
-        Marshal.Copy (source, destination, 0, amount)
+
         textures
 
     /// <summary>
