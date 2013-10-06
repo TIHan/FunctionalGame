@@ -43,7 +43,7 @@
     <Externalconsole>true</Externalconsole>
     <PlatformTarget>x86</PlatformTarget>
     <Tailcalls>true</Tailcalls>
-    <DefineConstants>OPENGL_3_3</DefineConstants>
+    <DefineConstants>OPENGL_2_1</DefineConstants>
   </PropertyGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
